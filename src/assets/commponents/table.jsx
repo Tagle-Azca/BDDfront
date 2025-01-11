@@ -1,13 +1,18 @@
-import * as React from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import { generateQRCode } from "../utils/generateQR";
+import React, { useState } from "react";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import {
+  Chip,
+  Box,
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { QRCodeCanvas } from "qrcode.react";
 
-const rowsData = [
+const initialRows = [
   {
     id: 1,
     fraccionamiento: "Los Robles",
@@ -40,35 +45,61 @@ const rowsData = [
   },
 ];
 
-export default function DataTable() {
-  const [rows, setRows] = React.useState(rowsData);
-  const [qrImage, setQrImage] = React.useState("");
-  const [selectedFraccionamiento, setSelectedFraccionamiento] =
-    React.useState("");
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+const DataTable = () => {
+  const [rows, setRows] = useState(initialRows);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openQRModal, setOpenQRModal] = useState(false);
+  const [qrData, setQrData] = useState("");
 
-  const handleGenerateQR = async (text) => {
-    const qrCodeImage = await generateQRCode(text);
-    setQrImage(qrCodeImage);
-    setSelectedFraccionamiento(text);
-    setIsModalOpen(true);
+  const handleDeleteSelected = () => {
+    setOpenConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    setRows((prevRows) =>
+      prevRows.filter((row) => !selectedRows.includes(row.id))
+    );
+    setSelectedRows([]);
+    setOpenConfirm(false);
+  };
+
+  const handleGenerateQR = (data) => {
+    setQrData(data);
+    setOpenQRModal(true);
+  };
+
+  const renderEstadoChip = (estado) => {
+    switch (estado) {
+      case "Activo":
+        return <Chip label="Activo" color="success" />;
+      case "Inactivo":
+        return <Chip label="Inactivo" color="error" />;
+      default:
+        return <Chip label="Desconocido" color="warning" />;
+    }
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
+    { field: "id", headerName: "ID", width: 70, sortable: true },
     {
       field: "fraccionamiento",
       headerName: "Fraccionamiento",
       width: 200,
-      editable: true,
+      sortable: true,
     },
     {
       field: "fechaCaducidad",
       headerName: "Fecha de Caducidad",
       width: 150,
-      editable: true,
+      sortable: true,
     },
-    { field: "estado", headerName: "Estado", width: 120, editable: true },
+    {
+      field: "estado",
+      headerName: "Estado",
+      width: 150,
+      renderCell: (params) => renderEstadoChip(params.value),
+    },
     {
       field: "generarQR",
       headerName: "Generar QR",
@@ -76,15 +107,12 @@ export default function DataTable() {
       renderCell: (params) => (
         <Button
           variant="contained"
-          sx={{
-            backgroundColor: "#42f560",
-            color: "black",
-            "&:hover": { backgroundColor: "#36c94e" },
+          style={{
+            borderRadius: "20px",
+            backgroundColor: "#FFFF",
+            color: "#000",
           }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleGenerateQR(params.row.fraccionamiento);
-          }}
+          onClick={() => handleGenerateQR(params.row.fraccionamiento)}
         >
           Generar QR
         </Button>
@@ -93,45 +121,91 @@ export default function DataTable() {
   ];
 
   return (
-    <Paper sx={{ height: 500, width: "100%" }}>
+    <Box
+      sx={{
+        height: 600,
+        width: "100%",
+        p: 3,
+        border: "none",
+        boxShadow: "none",
+      }}
+    >
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between" }}>
+        <Typography variant="h6">Administración de Fraccionamientos</Typography>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleDeleteSelected}
+          disabled={selectedRows.length === 0}
+        >
+          Eliminar Seleccionados
+        </Button>
+      </Box>
       <DataGrid
         rows={rows}
         columns={columns}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[5, 10, 20]}
+        checkboxSelection
         disableRowSelectionOnClick
-        sx={{ border: 0 }}
+        onRowSelectionModelChange={(newSelection) =>
+          setSelectedRows(newSelection)
+        }
+        components={{ Toolbar: GridToolbar }}
+        getRowClassName={(params) =>
+          params.row.estado === "Activo" ? "activo-row" : "inactivo-row"
+        }
+        sx={{
+          boxShadow: 3,
+          borderRadius: 2,
+          border: "none",
+          "& .MuiDataGrid-cell": {
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-columnHeaders": {
+            borderBottom: "none",
+          },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "none",
+          },
+          "& .activo-row": {
+            backgroundColor: "#d4edda",
+          },
+          "& .inactivo-row": {
+            backgroundColor: "#f8d7da",
+          },
+        }}
       />
 
-      <Dialog
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>Código QR Generado</DialogTitle>
-        <DialogContent
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            padding: 2,
-          }}
-        >
-          <h3>Código QR para: {selectedFraccionamiento}</h3>
-          {qrImage && (
-            <img
-              src={qrImage}
-              alt={`QR para ${selectedFraccionamiento}`}
-              style={{
-                maxWidth: "200px",
-                height: "auto",
-                border: "1px solid black",
-                padding: "10px",
-                marginLeft: "2rem",
-              }}
-            />
-          )}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>Seguro deseas eliminar los seeccionados?</Typography>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Eliminar
+          </Button>
+        </DialogActions>
       </Dialog>
-    </Paper>
+
+      <Dialog open={openQRModal} onClose={() => setOpenQRModal(false)}>
+        <DialogContent sx={{ textAlign: "center" }}>
+          <QRCodeCanvas value={qrData} size={200} />
+          <Typography variant="body1" sx={{ mt: 2, fontSize: 46 }}>
+            {qrData}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenQRModal(false)} color="black">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
-}
+};
+
+export default DataTable;

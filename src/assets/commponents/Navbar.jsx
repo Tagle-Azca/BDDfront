@@ -2,12 +2,12 @@ import React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
+import Logo from "../img/Eskayser.png";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -28,14 +28,23 @@ const Navbar = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" style={{ backgroundColor: "#00b34e" }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Eskayser
-          </Typography>
+      <AppBar
+        position="static"
+        style={{ backgroundColor: "#FFF", boxShadow: "#000" }}
+      >
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <img src={Logo} alt="Logo" style={{ height: "80px" }} />
+          </Box>
 
           <IconButton
-            edge="start"
+            edge="end"
             color="inherit"
             aria-label="menu"
             aria-controls="menu-navbar"
@@ -44,16 +53,16 @@ const Navbar = () => {
           >
             <MenuIcon />
           </IconButton>
-
-          <Menu
-            id="menu-navbar"
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
-          </Menu>
         </Toolbar>
+
+        <Menu
+          id="menu-navbar"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
+        </Menu>
       </AppBar>
     </Box>
   );

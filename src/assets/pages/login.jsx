@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Box, Button, TextField, Typography, Paper } from "@mui/material";
+import { Box, Button, TextField, Paper } from "@mui/material";
+import Logo from "../img/Eskayser.png";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -23,16 +24,22 @@ const Login = () => {
       sx={{
         maxWidth: 400,
         margin: "auto",
-        mt: 10,
+        mt: 28,
+        justifyContent: "center",
+        alignItems: "center",
         p: 4,
         display: "flex",
         flexDirection: "column",
         gap: 2,
       }}
     >
-      <Typography variant="h5" textAlign="center">
-        Iniciar Sesión
-      </Typography>
+      <Box textAlign="center">
+        <img
+          src={Logo}
+          alt="Logo"
+          style={{ height: "100px", marginBottom: "10px" }}
+        />
+      </Box>
       <form onSubmit={handleSubmit}>
         <TextField
           label="Correo Electrónico"
