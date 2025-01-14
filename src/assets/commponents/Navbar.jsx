@@ -45,7 +45,7 @@ const Navbar = () => {
 
           <IconButton
             edge="end"
-            color="inherit"
+            color="#0000"
             aria-label="menu"
             aria-controls="menu-navbar"
             aria-haspopup="true"

@@ -1,0 +1,9 @@
+# Instrucciones para correr el proyecto
+
+1. Clona el repositorio con el comando `git clone <url-del-repositorio>`
+2. Instala las dependencias con el comando `npm install`
+3. Inicia el proyecto con el comando `npm start`
+4. Abre un navegador y ve a la dirección `http://localhost:3000`
+5. Inicia sesión con las credenciales:
+   _ Usuario: admin
+   _ Contraseña: admin

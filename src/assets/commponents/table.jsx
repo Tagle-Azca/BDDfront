@@ -9,64 +9,74 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  IconButton,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
 import { QRCodeCanvas } from "qrcode.react";
 
 const initialRows = [
   {
     id: 1,
     fraccionamiento: "Los Robles",
-    fechaCaducidad: "2025-06-01",
+    fechaCaducidad: "01/01/2023",
     estado: "Activo",
   },
   {
     id: 2,
     fraccionamiento: "La Primavera",
-    fechaCaducidad: "2024-12-15",
+    fechaCaducidad: "15/12/2024",
     estado: "Inactivo",
   },
   {
     id: 3,
     fraccionamiento: "El Lago",
-    fechaCaducidad: "2026-01-20",
+    fechaCaducidad: "20/01/2025",
     estado: "Activo",
   },
   {
     id: 4,
     fraccionamiento: "Monte Verde",
-    fechaCaducidad: "2024-09-10",
+    fechaCaducidad: "10/09/2024",
     estado: "Inactivo",
   },
   {
     id: 5,
     fraccionamiento: "El Olivo",
-    fechaCaducidad: "2025-11-11",
+    fechaCaducidad: "11/11/2025",
     estado: "Activo",
   },
 ];
 
 const DataTable = () => {
   const [rows, setRows] = useState(initialRows);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [openConfirm, setOpenConfirm] = useState(false);
   const [openQRModal, setOpenQRModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
   const [qrData, setQrData] = useState("");
-
-  const handleDeleteSelected = () => {
-    setOpenConfirm(true);
-  };
-
-  const confirmDelete = () => {
-    setRows((prevRows) =>
-      prevRows.filter((row) => !selectedRows.includes(row.id))
-    );
-    setSelectedRows([]);
-    setOpenConfirm(false);
-  };
+  const [editingRow, setEditingRow] = useState(null);
+  const [updatedFraccionamiento, setUpdatedFraccionamiento] = useState("");
 
   const handleGenerateQR = (data) => {
     setQrData(data);
     setOpenQRModal(true);
+  };
+
+  const handleEditClick = (row) => {
+    setEditingRow(row);
+    setUpdatedFraccionamiento(row.fraccionamiento);
+    setOpenEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        row.id === editingRow.id
+          ? { ...row, fraccionamiento: updatedFraccionamiento }
+          : row
+      )
+    );
+    setOpenEditModal(false);
+    setEditingRow(null);
   };
 
   const renderEstadoChip = (estado) => {
@@ -81,19 +91,9 @@ const DataTable = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70, sortable: true },
-    {
-      field: "fraccionamiento",
-      headerName: "Fraccionamiento",
-      width: 200,
-      sortable: true,
-    },
-    {
-      field: "fechaCaducidad",
-      headerName: "Fecha de Caducidad",
-      width: 150,
-      sortable: true,
-    },
+    { field: "id", headerName: "ID", width: 70 },
+    { field: "fraccionamiento", headerName: "Fraccionamiento", width: 200 },
+    { field: "fechaCaducidad", headerName: "Fecha de Caducidad", width: 150 },
     {
       field: "estado",
       headerName: "Estado",
@@ -109,13 +109,25 @@ const DataTable = () => {
           variant="contained"
           style={{
             borderRadius: "20px",
-            backgroundColor: "#FFFF",
+            backgroundColor: "#ddd",
             color: "#000",
           }}
           onClick={() => handleGenerateQR(params.row.fraccionamiento)}
         >
           Generar QR
         </Button>
+      ),
+    },
+    {
+      field: "editar",
+      headerName: "",
+      width: 80,
+      align: "right",
+      sortable: false,
+      renderCell: (params) => (
+        <IconButton onClick={() => handleEditClick(params.row)}>
+          <EditIcon />
+        </IconButton>
       ),
     },
   ];
@@ -132,28 +144,13 @@ const DataTable = () => {
     >
       <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h6">Administración de Fraccionamientos</Typography>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleDeleteSelected}
-          disabled={selectedRows.length === 0}
-        >
-          Eliminar Seleccionados
-        </Button>
       </Box>
       <DataGrid
         rows={rows}
         columns={columns}
         pageSizeOptions={[5, 10, 20]}
-        checkboxSelection
         disableRowSelectionOnClick
-        onRowSelectionModelChange={(newSelection) =>
-          setSelectedRows(newSelection)
-        }
         components={{ Toolbar: GridToolbar }}
-        getRowClassName={(params) =>
-          params.row.estado === "Activo" ? "activo-row" : "inactivo-row"
-        }
         sx={{
           boxShadow: 3,
           borderRadius: 2,
@@ -167,40 +164,39 @@ const DataTable = () => {
           "& .MuiDataGrid-footerContainer": {
             borderTop: "none",
           },
-          "& .activo-row": {
-            backgroundColor: "#d4edda",
-          },
-          "& .inactivo-row": {
-            backgroundColor: "#f8d7da",
-          },
         }}
       />
-
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>
-          <Typography>Seguro deseas eliminar los seeccionados?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)} color="primary">
-            Cancelar
-          </Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Dialog open={openQRModal} onClose={() => setOpenQRModal(false)}>
         <DialogContent sx={{ textAlign: "center" }}>
           <QRCodeCanvas value={qrData} size={200} />
-          <Typography variant="body1" sx={{ mt: 2, fontSize: 46 }}>
+          <Typography variant="body1" sx={{ mt: 2, fontSize: 20 }}>
             {qrData}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenQRModal(false)} color="black">
+          <Button onClick={() => setOpenQRModal(false)} color="primary">
             Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
+        <DialogTitle>Cambio de Nombre</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Editar"
+            value={updatedFraccionamiento}
+            onChange={(e) => setUpdatedFraccionamiento(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditModal(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleSaveEdit} color="success" variant="contained">
+            Guardar Cambios
           </Button>
         </DialogActions>
       </Dialog>
