@@ -8,12 +8,28 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (email === "admin" && password === "admin") {
-      navigate("/fracc");
-    } else {
-      alert("Credenciales incorrectas");
+
+    try {
+      const response = await fetch("http://localhost:5002/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ usuario: email, contraseña: password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("fraccionamiento", data.user.fraccionamiento);
+        navigate("/fracc");
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert("Error al iniciar sesión. Inténtalo nuevamente.");
     }
   };
 

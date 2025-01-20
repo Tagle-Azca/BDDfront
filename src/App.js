@@ -9,6 +9,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/fracc" element={<Fracc />} />
+        <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
       </Routes>
     </Router>
   );
