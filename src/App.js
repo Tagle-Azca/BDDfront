@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./assets/pages/login";
 import Fracc from "./assets/pages/Fracc";
-
+import { SpeedInsights } from "@vercel/speed-insights/react";
 const App = () => {
   return (
     <Router>
