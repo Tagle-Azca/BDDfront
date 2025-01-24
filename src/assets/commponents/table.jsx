@@ -30,8 +30,6 @@ const DataTable = () => {
     contrasena: "",
   });
 
-  const API_URL = "http://localhost:5002/api/fracc";
-
   const columns = [
     { field: "id", headerName: "ID", width: 100 },
     { field: "usuario", headerName: "Usuario", width: 200 },
@@ -69,9 +67,14 @@ const DataTable = () => {
     { field: "fechaExpedicion", headerName: "Fecha de Expedición", width: 200 },
   ];
 
+  const API_URL =
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_API_URL_PROD
+      : process.env.REACT_APP_API_URL_LOCAL;
+
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${API_URL}/fraccionamientos`);
+      const response = await axios.get(`${API_URL}/api/fracc/fraccionamientos`);
       const data = response.data.map((item, index) => ({
         id: index + 1,
         _id: item._id,
