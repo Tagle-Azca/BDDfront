@@ -30,47 +30,10 @@ const DataTable = () => {
     contrasena: "",
   });
 
-  const columns = [
-    { field: "id", headerName: "ID", width: 100 },
-    { field: "usuario", headerName: "Usuario", width: 200 },
-    { field: "fraccionamiento", headerName: "Fraccionamiento", width: 250 },
-    {
-      field: "estado",
-      headerName: "Estado",
-      width: 150,
-      renderCell: (params) => (
-        <Switch
-          style={{
-            color: params.row.estado === "activo" ? "#00b34e" : "#f44336",
-          }}
-          checked={params.row.estado === "activo"}
-          onChange={() => handleEstadoChange(params.row._id, params.row.estado)}
-        />
-      ),
-    },
-    {
-      field: "Cambios y QR",
-      headerName: "Cambios y QR",
-      width: 150,
-      renderCell: (params) => (
-        <>
-          <IconButton onClick={() => handleEdit(params.row)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => handleQrModal(params.row)}>
-            <QrCodeIcon />
-          </IconButton>
-        </>
-      ),
-    },
-    { field: "correo", headerName: "Correo", width: 250 },
-    { field: "fechaExpedicion", headerName: "Fecha de Expedición", width: 200 },
-  ];
-
   const API_URL =
     process.env.NODE_ENV === "production"
       ? process.env.REACT_APP_API_URL_PROD
-      : process.env.REACT_APP_API_URL_LOCAL;
+      : process.env.REACT_APP_API_URL_DEV;
 
   const fetchData = async () => {
     try {
@@ -100,7 +63,7 @@ const DataTable = () => {
   const handleEstadoChange = async (id, currentEstado) => {
     const newEstado = currentEstado === "activo" ? "inactivo" : "activo";
     try {
-      await axios.patch(`${API_URL}/fraccionamientos/${id}`, {
+      await axios.patch(`${API_URL}/api/fracc/update/${id}`, {
         Estado: newEstado,
       });
       setRows((prevRows) =>
@@ -143,7 +106,7 @@ const DataTable = () => {
 
   const handleAddFraccionamiento = async () => {
     try {
-      const response = await axios.post(`${API_URL}/add`, formData);
+      const response = await axios.post(`${API_URL}/api/fracc/add`, formData);
       const newData = response.data.data;
       const newRow = {
         id: rows.length + 1,
@@ -183,7 +146,10 @@ const DataTable = () => {
       if (formData.correo) updatedData.correo = formData.correo;
       if (formData.contrasena) updatedData.contrasena = formData.contrasena;
 
-      await axios.put(`${API_URL}/update/${selectedRow._id}`, updatedData);
+      await axios.put(
+        `${API_URL}/api/fracc/update/${selectedRow._id}`,
+        updatedData
+      );
       setRows((prevRows) =>
         prevRows.map((row) =>
           row._id === selectedRow._id
@@ -196,6 +162,43 @@ const DataTable = () => {
       console.error("Error al actualizar el fraccionamiento:", error);
     }
   };
+
+  const columns = [
+    { field: "id", headerName: "ID", width: 100 },
+    { field: "usuario", headerName: "Usuario", width: 200 },
+    { field: "fraccionamiento", headerName: "Fraccionamiento", width: 250 },
+    {
+      field: "estado",
+      headerName: "Estado",
+      width: 150,
+      renderCell: (params) => (
+        <Switch
+          style={{
+            color: params.row.estado === "activo" ? "#00b34e" : "#f44336",
+          }}
+          checked={params.row.estado === "activo"}
+          onChange={() => handleEstadoChange(params.row._id, params.row.estado)}
+        />
+      ),
+    },
+    {
+      field: "Cambios y QR",
+      headerName: "Cambios y QR",
+      width: 150,
+      renderCell: (params) => (
+        <>
+          <IconButton onClick={() => handleEdit(params.row)}>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => handleQrModal(params.row)}>
+            <QrCodeIcon />
+          </IconButton>
+        </>
+      ),
+    },
+    { field: "correo", headerName: "Correo", width: 250 },
+    { field: "fechaExpedicion", headerName: "Fecha de Expedición", width: 200 },
+  ];
 
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -217,7 +220,6 @@ const DataTable = () => {
           disableSelectionOnClick
         />
       </div>
-      {/* Modal de Formulario */}
       <Dialog open={openForm} onClose={handleCloseForm}>
         <DialogTitle>
           {editMode ? "Editar Fraccionamiento" : "Agregar Fraccionamiento"}
@@ -271,8 +273,6 @@ const DataTable = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Modal para mostrar el QR */}
       <Dialog open={openQrModal} onClose={handleCloseQrModal}>
         <DialogTitle>QR del Fraccionamiento</DialogTitle>
         <DialogContent style={{ textAlign: "center" }}>
