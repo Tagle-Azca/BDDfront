@@ -7,7 +7,7 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/Login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Fracc />} />
         <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
       </Routes>
