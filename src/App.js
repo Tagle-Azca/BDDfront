@@ -9,7 +9,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Fracc />} />
-        <Route path="*" element={<h1>404 - Página no encontrada</h1>} />
+        <Route path="*" element={<h1>404 - Página no encontrada, regresar a https://ingresos-lime.vercel.app</h1>} />
       </Routes>
     </Router>
   );
