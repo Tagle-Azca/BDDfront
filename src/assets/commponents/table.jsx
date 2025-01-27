@@ -32,9 +32,8 @@ const DataTable = () => {
 
   const API_URL =
     process.env.NODE_ENV === "production"
-      ? process.env.REACT_APP_API_URL_PROD
-      : process.env.REACT_APP_API_URL_DEV;
-
+      ? "https://ingresosbackend.onrender.com"
+      : "http://localhost:5002";
   const fetchData = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/fracc/fraccionamientos`);
