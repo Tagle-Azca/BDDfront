@@ -46,7 +46,7 @@ const DataTable = () => {
         estado: item.Estado,
         qr: item.qr,
         correo: item.correo,
-        fechaExpedicion: new Date(item.fechaExpedicion).toLocaleDateString(),
+        fechaExpedicion: new Date(item.fechaExpedicion).toLocaleDateString(), // Ya existente
       }));
       setRows(data);
       setLoading(false);
@@ -164,13 +164,13 @@ const DataTable = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 100 },
-    { field: "usuario", headerName: "Usuario", width: 200 },
-    { field: "fraccionamiento", headerName: "Fraccionamiento", width: 250 },
+    { field: "id", headerName: "ID", flex: 0.5 }, // Más pequeño
+    { field: "usuario", headerName: "Usuario", flex: 1 },
+    { field: "fraccionamiento", headerName: "Fraccionamiento", flex: 1.5 },
     {
       field: "estado",
       headerName: "Estado",
-      width: 150,
+      flex: 1,
       renderCell: (params) => (
         <Switch
           style={{
@@ -184,7 +184,7 @@ const DataTable = () => {
     {
       field: "Cambios y QR",
       headerName: "Cambios y QR",
-      width: 150,
+      flex: 1,
       renderCell: (params) => (
         <>
           <IconButton onClick={() => handleEdit(params.row)}>
@@ -196,8 +196,9 @@ const DataTable = () => {
         </>
       ),
     },
-    { field: "correo", headerName: "Correo", width: 250 },
-    { field: "fechaExpedicion", headerName: "Fecha de Expedición", width: 200 },
+    { field: "correo", headerName: "Correo", flex: 1.5 },
+    { field: "fechaGenerada", headerName: "Fecha Generada", flex: 1 },
+    { field: "fechaExpedicion", headerName: "Fecha de Expedición", flex: 1 },
   ];
 
   return (
@@ -209,15 +210,17 @@ const DataTable = () => {
       >
         Agregar Nuevo
       </Button>
-      <div style={{ height: "calc(100% - 60px)", marginTop: 20 }}>
+      <div style={{ width: "100%", overflowX: "auto", marginTop: "1rem" }}>
         <DataGrid
           rows={rows}
           columns={columns}
           loading={loading}
-          pageSize={10}
-          rowsPerPageOptions={[5, 10, 20]}
+          pageSize={10} // Número de filas por página
+          rowsPerPageOptions={[5, 10, 20]} // Opciones de paginación
           pagination
+          paginationMode="client"
           disableSelectionOnClick
+          autoHeight // Ajusta automáticamente la altura según el contenido
         />
       </div>
       <Dialog open={openForm} onClose={handleCloseForm}>
