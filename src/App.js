@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "./assets/pages/Login";
+import Login from "./assets/pages/LoginTables";
 import Main from "./assets/pages/Admin";
 import Fracc from "./assets/pages/Fracc";
 
