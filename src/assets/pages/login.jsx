@@ -4,32 +4,40 @@ import Logo from "../img/Eskayser.png";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [error, setError] = useState(""); // Estado para manejar errores
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:5002/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ usuario: email, contraseña: password }),
-      });
+    // Validar que los campos no estén vacíos
+    if (!correo || !contrasena) {
+      setError("Correo y contraseña son obligatorios");
+      return;
+    }
 
+    try {
+      const response = await fetch("http://localhost:5002/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo, contrasena }),
+      });
+      
       const data = await response.json();
+      
 
       if (response.ok) {
-        localStorage.setItem("fraccionamiento", data.user.fraccionamiento);
-        navigate("/fracc");
+        localStorage.setItem("Usuario", data.usuario); 
+        navigate("/"); 
       } else {
-        alert(data.message);
+   
+        setError(data.error || "Error al iniciar sesión");
       }
     } catch (error) {
-      alert("Error al iniciar sesión. Inténtalo nuevamente.");
+      console.error("Error al iniciar sesión:", error);
+      setError("Ocurrió un error al procesar el inicio de sesión");
     }
   };
 
@@ -58,11 +66,11 @@ const Login = () => {
       </Box>
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Correo Electrónico"
+          label="Correo"
           variant="outlined"
           fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
           required
         />
         <TextField
@@ -70,11 +78,14 @@ const Login = () => {
           variant="outlined"
           type="password"
           fullWidth
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={contrasena}
+          onChange={(e) => setContrasena(e.target.value)}
           required
           sx={{ mt: 2 }}
         />
+        {error && ( // Mostrar mensaje de error si existe
+          <Box sx={{ color: "red", mt: 2, textAlign: "center" }}>{error}</Box>
+        )}
         <Button
           type="submit"
           variant="contained"

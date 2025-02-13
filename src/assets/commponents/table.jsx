@@ -8,15 +8,22 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Switch,
   Button,
   IconButton,
   TextField,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import axios from "axios";
 import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import QrCodeIcon from "@mui/icons-material/QrCode";
+import FraccionamientoModal from "./FraccionamientoModal";
+import ContactoModal from "./ContactoModal";
+import { QRCodeSVG } from "qrcode.react";
 
 const API_URL =
   process.env.NODE_ENV === "production"
@@ -27,9 +34,52 @@ export default function StickyHeadTable() {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openForm, setOpenForm] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [openContactoModal, setOpenContactoModal] = useState(false);
+  const [selectedContacto, setSelectedContacto] = useState(null);
+  const [openQrModal, setOpenQrModal] = useState(false);
+  const [qrData, setQrData] = useState(null);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [search, setSearch] = useState("");
+const [rowsPerPage, setRowsPerPage] = useState(10);
+const handleInputChange = (event) => {
+  const { name, value } = event.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+const handleChangePage = (event, newPage) => {
+  setPage(newPage);
+};
+
+const handleEstadoChange = async (id, currentEstado) => {
+  const newEstado = currentEstado === "activo" ? "inactivo" : "activo";
+  try {
+    await axios.patch(`${API_URL}/api/fracc/update/${id}`, { estado: newEstado });
+
+    console.log("Estado actualizado. Recargando tabla...");
+    fetchData(); 
+  } catch (error) {
+    console.error("Error al cambiar el estado:", error);
+  }
+};
+
+const handleChangeRowsPerPage = (event) => {
+  setRowsPerPage(parseInt(event.target.value, 10));
+  setPage(0);
+};
+
+  const [formData, setFormData] = useState({
+    nombre: "",
+    usuario: "",
+    direccion: "",
+    correo: "",
+    telefono: "",
+    estado: "activo",
+  });
 
   useEffect(() => {
     fetchData();
@@ -37,168 +87,205 @@ export default function StickyHeadTable() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/fracc/fraccionamientos`);
+      const response = await axios.get(`${API_URL}/api/fracc`);
+      console.log("📌 Fraccionamientos obtenidos:", response.data);
+
       const data = response.data.map((item, index) => ({
         id: index + 1,
         _id: item._id,
-        usuario: item.usuario,
-        fraccionamiento: item.fraccionamiento,
-        estado: item.Estado,
-        correo: item.correo,
-        fechaExpedicion: new Date(item.fechaExpedicion).toLocaleDateString(),
+        fraccionamiento: item.nombre || "Sin nombre",
+        usuario: item.usuario || "No asignado",
+        direccion: item.direccion || "Sin dirección",
+        correo: item.correo || "Sin correo",
+        telefono: item.telefono || "Sin teléfono",
+        estado: item.estado || "activo",
+        fechaExpiracion: item.fechaExpiracion
+          ? new Date(item.fechaExpiracion).toLocaleDateString()
+          : "No disponible",
+        qr: item.qr || "No disponible",
       }));
+
       setRows(data);
       setFilteredRows(data);
       setLoading(false);
     } catch (error) {
-      console.error("Error al cargar los datos:", error);
+      console.error("❌ Error al obtener los fraccionamientos:", error);
       setLoading(false);
     }
   };
 
-  const handleSearchChange = (event) => {
-    const value = event.target.value.toLowerCase();
-    setSearch(value);
-
-    const filteredData = rows.filter((row) =>
-      Object.values(row).some(
-        (field) =>
-          typeof field === "string" && field.toLowerCase().includes(value)
-      )
-    );
-
-    setFilteredRows(filteredData);
-    setPage(0);
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const handleEstadoChange = async (id, currentEstado) => {
-    const newEstado = currentEstado === "activo" ? "inactivo" : "activo";
-    try {
-      await axios.patch(`${API_URL}/api/fracc/update/${id}`, {
-        Estado: newEstado,
+  const handleOpenForm = (row = null) => {
+    if (row) {
+      setFormData({
+        nombre: row.fraccionamiento,
+        usuario: row.usuario,
+        direccion: row.direccion,
+        correo: row.correo,
+        telefono: row.telefono,
+        estado: row.estado,
       });
-      setRows((prevRows) =>
-        prevRows.map((row) =>
-          row._id === id ? { ...row, estado: newEstado } : row
-        )
-      );
-      setFilteredRows((prevRows) =>
-        prevRows.map((row) =>
-          row._id === id ? { ...row, estado: newEstado } : row
-        )
-      );
+      setSelectedRow(row);
+      setEditMode(true);
+    } else {
+      setFormData({
+        nombre: "",
+        usuario: "",
+        direccion: "",
+        correo: "",
+        telefono: "",
+        estado: "activo",
+      });
+      setEditMode(false);
+    }
+    setOpenForm(true);
+  };
+
+  const handleCloseForm = () => setOpenForm(false);
+
+  const handleSaveFraccionamiento = async () => {
+    try {
+      if (editMode) {
+        if (!selectedRow?._id) {
+          console.error("❌ No se puede actualizar: ID no válido");
+          return;
+        }
+  
+        console.log("📌 Datos enviados al backend:", formData);
+  
+        await axios.put(`${API_URL}/api/fracc/update/${selectedRow._id}`, formData);
+        
+        console.log("✅ Fraccionamiento actualizado. Recargando datos...");
+        
+      } else {
+        console.log("➕ Agregando nuevo fraccionamiento");
+        await axios.post(`${API_URL}/api/fracc/add`, formData);
+      }
+  
+      fetchData(); // 📌 Llamamos la función que recarga los datos después de guardar
+      handleCloseForm();
     } catch (error) {
-      console.error("Error al cambiar el estado:", error);
+      console.error("❌ Error al guardar el fraccionamiento:", error);
     }
   };
 
-  const columns = [
-    { id: "id", label: "ID", minWidth: 50 },
-    { id: "usuario", label: "Usuario", minWidth: 150 },
-    { id: "fraccionamiento", label: "Fraccionamiento", minWidth: 180 },
-    {
-      id: "estado",
-      label: "Estado",
-      minWidth: 100,
-      align: "center",
-      render: (row) => (
-        <Switch
-          checked={row.estado === "activo"}
-          onChange={() => handleEstadoChange(row._id, row.estado)}
-        />
-      ),
-    },
-    {
-      id: "acciones",
-      label: "Acciones",
-      minWidth: 100,
-      align: "center",
-      render: (row) => (
-        <>
-          <IconButton>
-            <EditIcon />
-          </IconButton>
-          <IconButton>
-            <QrCodeIcon />
-          </IconButton>
-        </>
-      ),
-    },
-    { id: "correo", label: "Correo", minWidth: 200 },
-    { id: "fechaExpedicion", label: "Fecha de Expedición", minWidth: 150 },
-  ];
+  const handleOpenContactoModal = (row) => {
+    setSelectedContacto(row);
+    setOpenContactoModal(true);
+  };
+
+  const handleCloseContactoModal = () => {
+    setOpenContactoModal(false);
+    setSelectedContacto(null);
+  };
+
+  const handleQrModal = (row) => {
+    setQrData(row.qr);
+    setOpenQrModal(true);
+  };
+
+  const handleCloseQrModal = () => setOpenQrModal(false);
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Button variant="contained" style={{ backgroundColor: "#00b34e", borderRadius:'40rem', height:'2.5rem'}}>
-          Agregar Nuevo
-        </Button>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <TextField
           label="Buscar..."
           variant="outlined"
-          value={search}
-          onChange={handleSearchChange}
           sx={{ width: "300px" }}
+          onChange={(e) =>
+            setFilteredRows(
+              rows.filter((row) =>
+                Object.values(row).some(
+                  (val) =>
+                    typeof val === "string" &&
+                    val.toLowerCase().includes(e.target.value.toLowerCase())
+                )
+              )
+            )
+          }
         />
+        <Button variant="contained" style={{ backgroundColor: "#00b34e" }} onClick={() => handleOpenForm()}>
+          Agregar  Fraccionamiento
+        </Button>
       </Box>
-
       <TableContainer sx={{ maxHeight: 500 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align || "left"}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+              <TableCell>Fraccionamiento</TableCell>
+              <TableCell>Usuario</TableCell>
+              <TableCell>Estado</TableCell>
+              <TableCell>Fecha de Expiración</TableCell>
+              <TableCell>Contacto</TableCell>
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} align="center">
-                  Cargando...
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredRows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
-                  <TableRow hover key={row._id}>
-                    {columns.map((column) => (
-                      <TableCell key={column.id} align={column.align || "left"}>
-                        {column.render ? column.render(row) : row[column.id]}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-            )}
+          {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+  <TableRow hover key={row._id}>
+    <TableCell>{row.fraccionamiento}</TableCell>
+    <TableCell>{row.usuario}</TableCell>
+    <TableCell>
+  <span
+    style={{
+      padding: "5px 10px",
+      borderRadius: "8px",
+      color: "white",
+      backgroundColor: row.estado === "activo" ? "#00b34e" : "#f44336",
+    }}
+  >
+    {row.estado}
+  </span>
+</TableCell>
+    <TableCell>{row.fechaExpiracion}</TableCell>
+    <TableCell>
+      <IconButton onClick={() => handleOpenContactoModal(row)}>
+        <VisibilityIcon />
+      </IconButton>
+    </TableCell>
+    <TableCell>
+      <IconButton onClick={() => handleQrModal(row)}>
+        <QrCodeIcon />
+      </IconButton>
+      <IconButton onClick={() => handleOpenForm(row)}>
+        <EditIcon />
+      </IconButton>
+    </TableCell>
+    
+  </TableRow>
+  
+))}
           </TableBody>
+          
         </Table>
+        <TablePagination
+  rowsPerPageOptions={[5, 10, 20]}
+  component="div"
+  count={filteredRows.length}
+  rowsPerPage={rowsPerPage}
+  page={page}
+  onPageChange={handleChangePage}
+  onRowsPerPageChange={handleChangeRowsPerPage}
+/>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 20]}
-        component="div"
-        count={filteredRows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+
+      <FraccionamientoModal
+  open={openForm}
+  handleClose={handleCloseForm}
+  handleSave={handleSaveFraccionamiento}
+  formData={formData}
+  handleInputChange={handleInputChange}
+  editMode={editMode}
+/>
+      <ContactoModal {...{ open: openContactoModal, handleClose: handleCloseContactoModal, contacto: selectedContacto }} />
+
+      <Dialog open={openQrModal} onClose={handleCloseQrModal}>
+        <DialogTitle>QR del Fraccionamiento</DialogTitle>
+        <DialogContent style={{ textAlign: "center" }}>{qrData && <QRCodeSVG value={qrData} size={200} />}</DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseQrModal} color="primary">Cerrar</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

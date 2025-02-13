@@ -8,10 +8,10 @@ const InputField = ({ label, name, value, onChange, type = "text" }) => {
       name={name}
       value={value}
       onChange={onChange}
-      type={type}
       fullWidth
+      margin="dense"
       variant="outlined"
-      margin="normal"
+      type={type}
     />
   );
 };
