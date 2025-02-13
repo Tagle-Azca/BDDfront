@@ -25,10 +25,7 @@ import FraccionamientoModal from "./FraccionamientoModal";
 import ContactoModal from "./ContactoModal";
 import { QRCodeSVG } from "qrcode.react";
 
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://ingresosbackend.onrender.com"
-    : "http://localhost:5002";
+const API_URL = process.env.REACT_APP_API_URL_PROD || "https://tudominio.com/api/fracc/fraccionamientos";
 
 export default function StickyHeadTable() {
   const [rows, setRows] = useState([]);
