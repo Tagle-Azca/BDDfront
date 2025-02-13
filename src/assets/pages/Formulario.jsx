@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import InputField from "../commponents/inputField";
+import InputField from "../commponents/TextField";
 import SubmitButton from "../commponents/subButton";
 
 const Formulario = () => {

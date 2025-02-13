@@ -1,6 +1,6 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/material";
-import InputField from "./InputField";
+import InputField from "./TextField";
 
 const FraccionamientoModal = ({ open, handleClose, handleSave, formData, handleInputChange, editMode }) => {
   return (
