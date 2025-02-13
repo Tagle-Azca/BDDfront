@@ -146,7 +146,7 @@ const handleChangeRowsPerPage = (event) => {
     try {
       if (editMode) {
         if (!selectedRow?._id) {
-          console.error("❌ No se puede actualizar: ID no válido");
+          console.error("No se puede actualizar: ID no válido");
           return;
         }
   
@@ -161,10 +161,10 @@ const handleChangeRowsPerPage = (event) => {
         await axios.post(`${API_URL}/api/fracc/add`, formData);
       }
   
-      fetchData(); // 📌 Llamamos la función que recarga los datos después de guardar
+      fetchData(); 
       handleCloseForm();
     } catch (error) {
-      console.error("❌ Error al guardar el fraccionamiento:", error);
+      console.error("Error al guardar el fraccionamiento:", error);
     }
   };
 
