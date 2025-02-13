@@ -4,6 +4,7 @@ import LoginTables from "./assets/pages/LoginTables";
 import Main from "./assets/pages/Admin";
 import Fracc from "./assets/pages/Fracc";
 
+// eslint-disable-next-line
 import { SpeedInsights } from "@vercel/speed-insights/react";
 const App = () => {
   return (

@@ -30,6 +30,7 @@ const API_URL = process.env.REACT_APP_API_URL_PROD || "https://tudominio.com/api
 export default function StickyHeadTable() {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
+  // eslint-disable-next-line
   const [loading, setLoading] = useState(true);
   const [openForm, setOpenForm] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -51,7 +52,7 @@ const handleInputChange = (event) => {
 const handleChangePage = (event, newPage) => {
   setPage(newPage);
 };
-
+// eslint-disable-next-line
 const handleEstadoChange = async (id, currentEstado) => {
   const newEstado = currentEstado === "activo" ? "inactivo" : "activo";
   try {
