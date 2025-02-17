@@ -21,63 +21,26 @@ import axios from "axios";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import QrCodeIcon from "@mui/icons-material/QrCode";
-import FraccionamientoModal from "./FraccionamientoModal";
+import AgregarFraccionamientoModal from "./AgregarFracionamientoModal"; 
+import EditarFraccionamientoModal from "./ModificarFraccionamientoModal"; 
 import ContactoModal from "./ContactoModal";
 import { QRCodeSVG } from "qrcode.react";
 
-const API_URL = process.env.REACT_APP_API_URL_PROD || "https://tudominio.com/api/fracc/fraccionamientos";
+const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc";
 
 export default function StickyHeadTable() {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
-  // eslint-disable-next-line
   const [loading, setLoading] = useState(true);
-  const [openForm, setOpenForm] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [openAgregar, setOpenAgregar] = useState(false);
+  const [openEditar, setOpenEditar] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [openContactoModal, setOpenContactoModal] = useState(false);
   const [selectedContacto, setSelectedContacto] = useState(null);
   const [openQrModal, setOpenQrModal] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [page, setPage] = useState(0);
-const [rowsPerPage, setRowsPerPage] = useState(10);
-const handleInputChange = (event) => {
-  const { name, value } = event.target;
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-
-const handleChangePage = (event, newPage) => {
-  setPage(newPage);
-};
-// eslint-disable-next-line
-const handleEstadoChange = async (id, currentEstado) => {
-  const newEstado = currentEstado === "activo" ? "inactivo" : "activo";
-  try {
-    await axios.patch(`${API_URL}/api/fracc/update/${id}`, { estado: newEstado });
-
-    console.log("Estado actualizado. Recargando tabla...");
-    fetchData(); 
-  } catch (error) {
-    console.error("Error al cambiar el estado:", error);
-  }
-};
-
-const handleChangeRowsPerPage = (event) => {
-  setRowsPerPage(parseInt(event.target.value, 10));
-  setPage(0);
-};
-
-  const [formData, setFormData] = useState({
-    nombre: "",
-    usuario: "",
-    direccion: "",
-    correo: "",
-    telefono: "",
-    estado: "activo",
-  });
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchData();
@@ -86,8 +49,6 @@ const handleChangeRowsPerPage = (event) => {
   const fetchData = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/fracc`);
-      console.log("📌 Fraccionamientos obtenidos:", response.data);
-
       const data = response.data.map((item, index) => ({
         id: index + 1,
         _id: item._id,
@@ -97,9 +58,7 @@ const handleChangeRowsPerPage = (event) => {
         correo: item.correo || "Sin correo",
         telefono: item.telefono || "Sin teléfono",
         estado: item.estado || "activo",
-        fechaExpiracion: item.fechaExpiracion
-          ? new Date(item.fechaExpiracion).toLocaleDateString()
-          : "No disponible",
+        fechaExpiracion: item.fechaExpiracion ? new Date(item.fechaExpiracion).toLocaleDateString() : "No disponible",
         qr: item.qr || "No disponible",
       }));
 
@@ -112,58 +71,31 @@ const handleChangeRowsPerPage = (event) => {
     }
   };
 
-  const handleOpenForm = (row = null) => {
-    if (row) {
-      setFormData({
-        nombre: row.fraccionamiento,
-        usuario: row.usuario,
-        direccion: row.direccion,
-        correo: row.correo,
-        telefono: row.telefono,
-        estado: row.estado,
-      });
-      setSelectedRow(row);
-      setEditMode(true);
-    } else {
-      setFormData({
-        nombre: "",
-        usuario: "",
-        direccion: "",
-        correo: "",
-        telefono: "",
-        estado: "activo",
-      });
-      setEditMode(false);
-    }
-    setOpenForm(true);
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
 
-  const handleCloseForm = () => setOpenForm(false);
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
-  const handleSaveFraccionamiento = async () => {
-    try {
-      if (editMode) {
-        if (!selectedRow?._id) {
-          console.error("No se puede actualizar: ID no válido");
-          return;
-        }
-  
-        console.log("📌 Datos enviados al backend:", formData);
-  
-        await axios.put(`${API_URL}/api/fracc/update/${selectedRow._id}`, formData);
-        
-        console.log("✅ Fraccionamiento actualizado. Recargando datos...");
-        
-      } else {
-        console.log("➕ Agregando nuevo fraccionamiento");
-        await axios.post(`${API_URL}/api/fracc/add`, formData);
-      }
-  
-      fetchData(); 
-      handleCloseForm();
-    } catch (error) {
-      console.error("Error al guardar el fraccionamiento:", error);
-    }
+  const handleOpenAgregar = () => {
+    setOpenAgregar(true);
+  };
+
+  const handleCloseAgregar = () => {
+    setOpenAgregar(false);
+  };
+
+  const handleOpenEditar = (row) => {
+    setSelectedRow(row);
+    setOpenEditar(true);
+  };
+
+  const handleCloseEditar = () => {
+    setOpenEditar(false);
+    setSelectedRow(null);
   };
 
   const handleOpenContactoModal = (row) => {
@@ -202,8 +134,12 @@ const handleChangeRowsPerPage = (event) => {
             )
           }
         />
-        <Button variant="contained" style={{ backgroundColor: "#00b34e" }} onClick={() => handleOpenForm()}>
-          Agregar  Fraccionamiento
+        <Button
+          variant="contained"
+          style={{ backgroundColor: "#00b34e" }}
+          onClick={handleOpenAgregar}
+        >
+          Agregar Nuevo
         </Button>
       </Box>
       <TableContainer sx={{ maxHeight: 500 }}>
@@ -219,69 +155,69 @@ const handleChangeRowsPerPage = (event) => {
             </TableRow>
           </TableHead>
           <TableBody>
-          {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-  <TableRow hover key={row._id}>
-    <TableCell>{row.fraccionamiento}</TableCell>
-    <TableCell>{row.usuario}</TableCell>
-    <TableCell>
-  <span
-    style={{
-      padding: "5px 10px",
-      borderRadius: "8px",
-      color: "white",
-      backgroundColor: row.estado === "activo" ? "#00b34e" : "#f44336",
-    }}
-  >
-    {row.estado}
-  </span>
-</TableCell>
-    <TableCell>{row.fechaExpiracion}</TableCell>
-    <TableCell>
-      <IconButton onClick={() => handleOpenContactoModal(row)}>
-        <VisibilityIcon />
-      </IconButton>
-    </TableCell>
-    <TableCell>
-      <IconButton onClick={() => handleQrModal(row)}>
-        <QrCodeIcon />
-      </IconButton>
-      <IconButton onClick={() => handleOpenForm(row)}>
-        <EditIcon />
-      </IconButton>
-    </TableCell>
-    
-  </TableRow>
-  
-))}
+            {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              <TableRow hover key={row._id}>
+                <TableCell>{row.fraccionamiento}</TableCell>
+                <TableCell>{row.usuario}</TableCell>
+                <TableCell>
+                  <span
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: "8px",
+                      color: "white",
+                      backgroundColor: row.estado === "activo" ? "#00b34e" : "#f44336",
+                    }}
+                  >
+                    {row.estado}
+                  </span>
+                </TableCell>
+                <TableCell>{row.fechaExpiracion}</TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleOpenContactoModal(row)}>
+                    <VisibilityIcon />
+                  </IconButton>
+                </TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleQrModal(row)}>
+                    <QrCodeIcon />
+                  </IconButton>
+                  <IconButton onClick={() => handleOpenEditar(row)}>
+                    <EditIcon /> {/* Icono de edición */}
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
-          
         </Table>
-        <TablePagination
-  rowsPerPageOptions={[5, 10, 20]}
-  component="div"
-  count={filteredRows.length}
-  rowsPerPage={rowsPerPage}
-  page={page}
-  onPageChange={handleChangePage}
-  onRowsPerPageChange={handleChangeRowsPerPage}
-/>
       </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 20]}
+        component="div"
+        count={filteredRows.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
 
-      <FraccionamientoModal
-  open={openForm}
-  handleClose={handleCloseForm}
-  handleSave={handleSaveFraccionamiento}
-  formData={formData}
-  handleInputChange={handleInputChange}
-  editMode={editMode}
-/>
+      <AgregarFraccionamientoModal open={openAgregar} handleClose={handleCloseAgregar} fetchData={fetchData} />
+
+      <EditarFraccionamientoModal
+        open={openEditar}
+        handleClose={handleCloseEditar}
+        fraccionamiento={selectedRow}
+        fetchData={fetchData}
+      />
+
       <ContactoModal {...{ open: openContactoModal, handleClose: handleCloseContactoModal, contacto: selectedContacto }} />
 
       <Dialog open={openQrModal} onClose={handleCloseQrModal}>
         <DialogTitle>QR del Fraccionamiento</DialogTitle>
         <DialogContent style={{ textAlign: "center" }}>{qrData && <QRCodeSVG value={qrData} size={200} />}</DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseQrModal} color="primary">Cerrar</Button>
+          <Button onClick={handleCloseQrModal} color="primary">
+            Cerrar
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>
