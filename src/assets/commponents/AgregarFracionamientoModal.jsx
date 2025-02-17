@@ -3,13 +3,13 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 import InputField from "./TextField";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc";
+const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc/";
 
 const AgregarFraccionamientoModal = ({ open, handleClose, fetchData }) => {
   const [formData, setFormData] = useState({
     nombre: "",
     usuario: "",
-    contraseña: "",
+    contrasena: "",
     direccion: "",
     correo: "",
     telefono: "",
@@ -38,7 +38,7 @@ const AgregarFraccionamientoModal = ({ open, handleClose, fetchData }) => {
       <DialogContent>
         <InputField label="Fraccionamiento" name="nombre" value={formData.nombre} onChange={handleInputChange} />
         <InputField label="Usuario" name="usuario" value={formData.usuario} onChange={handleInputChange} />
-        <InputField label="Contraseña" name="contraseña" type="password" value={formData.contraseña} onChange={handleInputChange} />
+        <InputField label="Contraseña" name="contrasena" type="password" value={formData.contraseña} onChange={handleInputChange} />
         <InputField label="Dirección" name="direccion" value={formData.direccion} onChange={handleInputChange} />
         <InputField label="Correo" name="correo" type="email" value={formData.correo} onChange={handleInputChange} />
         <InputField label="Teléfono" name="telefono" type="tel" value={formData.telefono} onChange={handleInputChange} />
