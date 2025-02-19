@@ -4,8 +4,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } 
 const ContactoModal = ({ open, handleClose, contacto }) => {
 
   const [contactoData, setContactoData] = useState({
-    nombre: "",
-    usuario: "",
+    
     correo: "",
     telefono: "",
     direccion: "",
@@ -21,12 +20,10 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
         correo: contacto.correo || "",
         telefono: contacto.telefono || "",
         direccion: contacto.direccion || "",
-        estado: contacto.estado || "",
       });
     }
   }, [contacto]);
 
-  // Manejar cambios en los inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setContactoData((prevData) => ({
@@ -62,22 +59,8 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>Información del Contacto</DialogTitle>
       <DialogContent>
-        <TextField
-          label="Fraccionamiento"
-          name="nombre"
-          value={contactoData.nombre}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
-        <TextField
-          label="Usuario"
-          name="usuario"
-          value={contactoData.usuario}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
-        />
+       
+        
         <TextField
           label="Correo"
           name="correo"
@@ -100,17 +83,9 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
           label="Dirección"
           name="direccion"
           value={contactoData.direccion}
-          onChange={handleInputChange}
           fullWidth
           margin="normal"
-        />
-        <TextField
-          label="Estado"
-          name="estado"
-          value={contactoData.estado}
-          onChange={handleInputChange}
-          fullWidth
-          margin="normal"
+          s
         />
       </DialogContent>
       <DialogActions>

@@ -3,12 +3,13 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 import InputField from "./TextField";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc/update/";
+const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc";
 
 const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchData }) => {
   const [formData, setFormData] = useState({
     nombre: "",
     usuario: "",
+    contrasena: "",
     direccion: "",
     correo: "",
     telefono: "",
@@ -16,16 +17,19 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
   });
 
   useEffect(() => {
-    if (fraccionamiento) {
-      setFormData({
-        nombre: fraccionamiento.nombre || "",
-        usuario: fraccionamiento.usuario || "",
-        direccion: fraccionamiento.direccion || "",
-        correo: fraccionamiento.correo || "",
-        telefono: fraccionamiento.telefono || "",
-        estado: fraccionamiento.estado || "activo",
-      });
-    }
+    if (!fraccionamiento || !fraccionamiento._id) return;
+  
+    setFormData({
+      nombre: fraccionamiento.fraccionamiento || "",
+      usuario: fraccionamiento.usuario || "",
+      direccion: fraccionamiento.direccion || "",
+      correo: fraccionamiento.correo || "",
+      telefono: fraccionamiento.telefono || "",
+      estado: fraccionamiento.estado || "activo",
+      contrasena: "", 
+    });
+  
+    console.log("📥 Datos cargados en el modal:", fraccionamiento);
   }, [fraccionamiento]);
 
   const handleInputChange = (e) => {
@@ -38,14 +42,24 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       console.error("❌ No se puede actualizar: ID no válido");
       return;
     }
+  
+    const requestUrl = `https://ingresosbackend.onrender.com/api/fracc/update/${fraccionamiento._id}`;
+  
 
+    const updateData = Object.fromEntries(
+      Object.entries(formData).filter(([key, value]) => value.trim() !== "")
+    );
+  
+    console.log("📌 URL de actualización que se enviará:", requestUrl);
+    console.log("📥 Datos enviados al backend (filtrados):", updateData);
+  
     try {
-      const response = await axios.put(`${API_URL}/update/${fraccionamiento._id}`, formData);
+      const response = await axios.put(requestUrl, updateData);
       console.log("✅ Fraccionamiento actualizado:", response.data);
-      fetchData(); 
+      fetchData();
       handleClose();
     } catch (error) {
-      console.error("❌ Error al actualizar fraccionamiento:", error);
+      console.error("❌ Error al actualizar fraccionamiento:", error.response?.data || error.message);
     }
   };
 
@@ -53,8 +67,9 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>Editar Fraccionamiento</DialogTitle>
       <DialogContent>
-        <InputField label="Fraccionamiento" name="nombre" value={formData.nombre} onChange={handleInputChange} />
+      <InputField label="Fraccionamiento" name="nombre" value={formData.nombre} onChange={handleInputChange} />
         <InputField label="Usuario" name="usuario" value={formData.usuario} onChange={handleInputChange} />
+        <InputField label="Contraseña" name="contrasena" type="password" value={formData.contraseña} onChange={handleInputChange} />
         <InputField label="Dirección" name="direccion" value={formData.direccion} onChange={handleInputChange} />
         <InputField label="Correo" name="correo" type="email" value={formData.correo} onChange={handleInputChange} />
         <InputField label="Teléfono" name="telefono" type="tel" value={formData.telefono} onChange={handleInputChange} />
