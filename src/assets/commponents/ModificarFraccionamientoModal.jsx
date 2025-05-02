@@ -13,7 +13,7 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
     direccion: "",
     correo: "",
     telefono: "",
-    estado: "activo",
+    estado: "",
   });
 
   useEffect(() => {
@@ -25,11 +25,10 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       direccion: fraccionamiento.direccion || "",
       correo: fraccionamiento.correo || "",
       telefono: fraccionamiento.telefono || "",
-      estado: fraccionamiento.estado || "activo",
+      estado: fraccionamiento.estado || "",
       contrasena: "", 
     });
   
-    console.log("📥 Datos cargados en el modal:", fraccionamiento);
   }, [fraccionamiento]);
 
   const handleInputChange = (e) => {

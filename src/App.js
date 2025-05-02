@@ -1,22 +1,18 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import LoginTables from "./assets/pages/LoginTables";
-import Main from "./assets/pages/Admin";
-import Fracc from "./assets/pages/Fracc";
-
-// eslint-disable-next-line
-import { SpeedInsights } from "@vercel/speed-insights/react";
-const App = () => {
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./assets/pages/Login";
+import FraccDashboard from "./assets/pages/Dashboard";
+import AdminDashboard from "./assets/pages/Admin";
+function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginTables />} />
-        <Route path="/" element={<Main />} />
-        <Route path="/Fracc" element={<Fracc />} />
-        <Route path="*" element={<h1>404 - Página no encontrada, regresar a https://ingresos-lime.vercel.app</h1>} />
+        <Route path="/" element={<Login />} />
+        <Route path="/dashboard/:id" element={<FraccDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
-};
+}
 
 export default App;

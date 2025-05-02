@@ -26,8 +26,10 @@ import EditarFraccionamientoModal from "./ModificarFraccionamientoModal";
 import ContactoModal from "./ContactoModal";
 import { QRCodeSVG } from "qrcode.react";
 
-const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc";
-
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_API_URL_PROD + "/api/fracc"
+    : process.env.REACT_APP_API_URL_DEV + "/api/fracc";
 export default function TableAdmin() {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -48,7 +50,7 @@ export default function TableAdmin() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/fracc`);
+      const response = await axios.get(API_URL);
       const data = response.data.map((item, index) => ({
         id: index + 1,
         _id: item._id,

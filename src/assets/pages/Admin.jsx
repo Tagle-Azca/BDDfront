@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "../commponents/Navbar";
-import DataTablePremium from "../commponents/table";
+import EskayserAdminTable from "../commponents/EskayserAdminTable";
 import { Box } from "@mui/material";
 
 const MainPage = () => {
@@ -8,7 +8,7 @@ const MainPage = () => {
     <Box>
       <Navbar />
       <Box sx={{ padding: "50px", marginTop:"-2.5rem"}}>
-        <DataTablePremium />
+        <EskayserAdminTable />
       </Box>
     </Box>
   );
