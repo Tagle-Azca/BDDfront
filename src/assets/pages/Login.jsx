@@ -19,7 +19,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/fracc/login`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL_PROD}/api/fracc/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuario, contrasena }),
