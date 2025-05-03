@@ -22,7 +22,7 @@ export default function Dashboard() {
     }
 
     try {
-      const response = await axios.get(`${API_URL}/perfil`, {
+      const response = await axios.get(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
