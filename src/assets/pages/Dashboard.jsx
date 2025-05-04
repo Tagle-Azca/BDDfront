@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc";
+const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002";
 
 export default function Dashboard() {
   const [fraccionamiento, setFraccionamiento] = useState(null);
@@ -25,7 +25,7 @@ export default function Dashboard() {
     }
 
     try {
-      const response = await axios.get(`${API_URL}/${id}`, {
+      const response = await axios.get(`${API_URL}/api/fracc/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
