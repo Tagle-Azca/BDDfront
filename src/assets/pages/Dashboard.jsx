@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002/api/fracc";
 
 export default function Dashboard() {
-  const { id } = useParams(); // ID del fraccionamiento
   const [fraccionamiento, setFraccionamiento] = useState(null);
 
   useEffect(() => {
-    console.log("ID recibido en Dashboard:", id);
-    fetchFraccionamiento();
-  }, [id]);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user._id) {
+      console.error("No hay usuario logueado");
+      return;
+    }
+    console.log("ID recibido en Dashboard:", user._id);
+    fetchFraccionamiento(user._id);
+  }, []);
 
-  const fetchFraccionamiento = async () => {
+  const fetchFraccionamiento = async (id) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
