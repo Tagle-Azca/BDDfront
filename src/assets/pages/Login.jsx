@@ -35,7 +35,7 @@ function Login() {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("usuario", JSON.stringify(data));
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       if (data.user.usuario === "admin Eskayser") {
         navigate("/admin");
