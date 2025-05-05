@@ -3,9 +3,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from "@mui/
 import InputField from "./TextField";
 import axios from "axios";
 
-const API_URL = process.env.NODE_ENV === "production"
-  ? process.env.REACT_APP_API_URL_PROD + "/api/fracc"
-  : "http://localhost:5002/api/fracc";
+const API_URL = process.env.REACT_APP_API_URL_PROD;
 
 const AgregarFraccionamientoModal = ({ open, handleClose, fetchData }) => {
   const [formData, setFormData] = useState({

@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import eskayser from "../img/Eskayser.png";
 
+const API_URL = process.env.REACT_APP_API_URL_PROD;
+
 function Login() {
   const [usuario, setUsuario] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -19,7 +21,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL_PROD}/api/fracc/login`, {
+      const response = await fetch(`${API_URL}/api/fracc/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usuario, contrasena }),
@@ -30,7 +32,7 @@ function Login() {
       console.log("🔍 Login response body:", data);
 
       if (!response.ok) {
-        setError(data.error);
+        setError(data.error || "Credenciales incorrectas");
         return;
       }
 
@@ -44,6 +46,7 @@ function Login() {
         navigate(`/dashboard/${data.user._id}`);
       }
     } catch (error) {
+      console.error("❌ Error en login:", error);
       setError("Error al conectar con el servidor.");
     }
   };
@@ -76,8 +79,6 @@ function Login() {
           style={{ width: 300, height: 100, marginBottom: 10 }}
         />
 
-        
-
         {error && <Alert severity="error">{error}</Alert>}
 
         <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
@@ -89,8 +90,8 @@ function Login() {
             onChange={(e) => setUsuario(e.target.value)}
             sx={{
               "& .MuiOutlinedInput-root": {
-                "&:hover fieldset": { borderColor: "green" }, 
-                "&.Mui-focused fieldset": { borderColor: "green" }, 
+                "&:hover fieldset": { borderColor: "green" },
+                "&.Mui-focused fieldset": { borderColor: "green" },
               },
             }}
           />
@@ -104,7 +105,7 @@ function Login() {
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": { borderColor: "green" },
-                "&.Mui-focused fieldset": { borderColor: "green" }, 
+                "&.Mui-focused fieldset": { borderColor: "green" },
               },
             }}
           />
