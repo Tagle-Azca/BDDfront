@@ -187,7 +187,7 @@ export default function DashboardFracc() {
                         </IconButton>
                       </TableCell>
                       <TableCell>
-                        <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small" style={{backgroundColor:"#0ba969"}}>
+                        <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small" style={{backgroundColor:"#0ba969", color:"white"}}>
                           Agregar
                         </Button>
                       </TableCell>
