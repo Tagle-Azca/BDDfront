@@ -23,6 +23,8 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
+const API_URL = "https://ingresosbackend.onrender.com";
+
 const CollapsibleTable = () => {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
@@ -35,11 +37,6 @@ const CollapsibleTable = () => {
     edad: "",
     telefono: "",
   });
-
-  const API_URL =
-    process.env.NODE_ENV === "production"
-      ? "https://ingresosbackend.onrender.com"
-      : "http://localhost:5002";
 
   useEffect(() => {
     const fraccId = localStorage.getItem("fraccId");
@@ -206,7 +203,6 @@ const CollapsibleTable = () => {
   return (
     <>
       <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-        {/* Contenedor del Botón y Finder */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <Button
             variant="contained"
