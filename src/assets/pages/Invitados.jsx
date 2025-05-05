@@ -12,32 +12,41 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 function Invitados() {
   const [nombre, setNombre] = useState("");
   const [motivo, setMotivo] = useState("");
   const [residencia, setResidencia] = useState("");
   const [fotoDni, setFotoDni] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState("");
   const [errorGeneral, setErrorGeneral] = useState("");
-  const [fotoError, setFotoError] = useState(false); 
+  const [fotoError, setFotoError] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [fraccId, setFraccId] = useState("");
 
-  const residencias = [
-    "Casa 1", "Casa 2", "Casa 3",
-    "Depto 101", "Depto 102", "Depto 201", "Depto 202"
-  ];
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id) {
+      setFraccId(id);
+    } else {
+      setErrorGeneral("ID de fraccionamiento no encontrado.");
+    }
+  }, [searchParams]);
 
   const handleFotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFotoDni(file);
-      setFotoError(false); 
+      setFotoPreview(URL.createObjectURL(file)); 
+      setFotoError(false);
     }
   };
 
   const handleSubmit = async () => {
     if (!fotoDni) {
-      setFotoError(true); 
+      setFotoError(true);
       return;
     }
 
@@ -46,6 +55,7 @@ function Invitados() {
     formData.append("motivo", motivo);
     formData.append("residencia", residencia);
     formData.append("fotoDni", fotoDni);
+    formData.append("fraccId", fraccId);
 
     try {
       const response = await fetch("http://localhost:5002/api/auth/visitas", {
@@ -96,70 +106,69 @@ function Invitados() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             fullWidth
-            sx={{ 
-              borderRadius: 3,
-              '& .MuiInputBase-input': { color: 'black' },
-              '& .MuiInputLabel-root': { color: 'black' },
-            }}
           />
           <TextField
             label="Motivo de la visita"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             fullWidth
-            sx={{ 
-              borderRadius: 3,
-              '& .MuiInputBase-input': { color: 'black' },
-              '& .MuiInputLabel-root': { color: 'black' },
-            }}
           />
 
           <FormControl fullWidth>
-            <InputLabel sx={{ color: "black" }}>Residencia</InputLabel>
+            <InputLabel>Residencia</InputLabel>
             <Select
               value={residencia}
               onChange={(e) => setResidencia(e.target.value)}
-              sx={{ 
-                borderRadius: 3,
-                color: "black",
-                '.MuiSelect-icon': { color: 'black' },
-              }}
             >
-              {residencias.map((r) => (
-                <MenuItem key={r} value={r} sx={{ color: "black" }}>
-                  {r}
-                </MenuItem>
-              ))}
+              <MenuItem value="Casa 1">Casa 1</MenuItem>
+              <MenuItem value="Casa 2">Casa 2</MenuItem>
+              <MenuItem value="Depto 101">Depto 101</MenuItem>
+              {/* Podrías llenar esto dinámicamente desde el backend */}
             </Select>
           </FormControl>
 
+          <Box sx={{ textAlign: "center" }}>
           <Button
             component="label"
             variant="outlined"
-            sx={{
-              borderRadius: "30px",
-              height: "3.5rem",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              textTransform: "none",
-              width: "100%",
-              color: "black",
-              borderColor: "black",
-              '&:hover': {
-                backgroundColor: "#e0e0e0",
-                borderColor: "black",
-              },
-            }}
+            sx={{ borderRadius: "30px", mb: 1 }}
           >
-            {fotoDni ? "Foto cargada" : "Foto del DNI"}
+            {fotoDni ? "Cambiar selfie" : "Tomar selfie"}
             <input
               type="file"
               accept="image/*"
-              capture="environment"
+              capture="user"
               hidden
               onChange={handleFotoChange}
             />
           </Button>
+
+          {fotoPreview && (
+            <Box>
+              <img
+                src={fotoPreview}
+                alt="Vista previa"
+                style={{ width: "100%", borderRadius: 10, marginBottom: 10 }}
+              />
+              <Button
+                color="error"
+                size="small"
+                onClick={() => {
+                  setFotoDni(null);
+                  setFotoPreview("");
+                }}
+              >
+                Eliminar selfie
+              </Button>
+            </Box>
+          )}
+
+          {fotoError && (
+            <Typography color="red" fontWeight="bold" mt={1}>
+              Agrega una identificación
+            </Typography>
+          )}
+        </Box>
 
           {fotoError && (
             <Typography color="red" textAlign="center" fontWeight="bold">
@@ -176,10 +185,6 @@ function Invitados() {
                   backgroundColor: fotoError ? "#cc0000" : "success.dark",
                 },
                 borderRadius: "30px",
-                height: "3.5rem",
-                fontSize: "1rem",
-                fontWeight: "bold",
-                textTransform: "none",
                 width: "70%",
               }}
               onClick={handleSubmit}

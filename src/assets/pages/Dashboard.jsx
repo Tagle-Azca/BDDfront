@@ -255,6 +255,7 @@ export default function DashboardFracc() {
             <DialogContent>
               <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
               <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
+              <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />  
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenForm(false)} size="small">Cancelar</Button>
