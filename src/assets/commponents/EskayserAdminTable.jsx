@@ -26,10 +26,7 @@ import EditarFraccionamientoModal from "./ModificarFraccionamientoModal";
 import ContactoModal from "./ContactoModal";
 import { QRCodeSVG } from "qrcode.react";
 
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_API_URL_PROD + "/api/fracc"
-    : process.env.REACT_APP_API_URL_DEV + "/api/fracc";
+const API_URL = process.env.REACT_APP_API_URL_PROD;
 export default function TableAdmin() {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
