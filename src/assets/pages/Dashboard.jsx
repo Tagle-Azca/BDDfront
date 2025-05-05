@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import {
   Dialog,
@@ -111,142 +112,111 @@ export default function DashboardFracc() {
   };
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6">Casas del Fraccionamiento</Typography>
-        <Button onClick={() => setOpenAddCasa(true)} variant="contained">
-          Agregar Casa
-        </Button>
-      </Box>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>Número</TableCell>
-              <TableCell>QR</TableCell>
-              <TableCell>Agregar</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((row) => (
-              <>
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <IconButton onClick={() => toggleRow(row.id)}>
-                      {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
-                  </TableCell>
-                  <TableCell>{row.numero}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={() => {
-                        const fraccId = JSON.parse(localStorage.getItem("user"))._id;
-                        setQrValue(
-                          `https://admin-one-livid.vercel.app/RegistroResidente?id=${fraccId}&casa=${row.numero}`
-                        );
-                        setOpenQR(true);
-                      }}
-                    >
-                      <RemoveRedEyeIcon />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outlined" onClick={() => handleOpenForm(row)}>
-                      Agregar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell colSpan={4} style={{ paddingBottom: 0, paddingTop: 0 }}>
-                    <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
-                      <Box margin={2}>
-                        <Typography variant="subtitle1">Residentes</Typography>
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Nombre</TableCell>
-                              <TableCell>Edad</TableCell>
-                              <TableCell>Relación</TableCell>
-                              <TableCell>Teléfono</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {row.residentes.map((res, idx) => (
-                              <TableRow key={idx}>
-                                <TableCell>{res.nombre}</TableCell>
-                                <TableCell>{res.edad}</TableCell>
-                                <TableCell>{res.relacion}</TableCell>
-                                <TableCell>{res.telefono}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </Box>
-                    </Collapse>
-                  </TableCell>
-                </TableRow>
-              </>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Modal QR */}
-      <Dialog open={openQR} onClose={() => setOpenQR(false)}>
-        <DialogTitle>QR de Registro</DialogTitle>
-        <DialogContent>
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-              qrValue
-            )}`}
-            alt="QR"
-          />
-          <Typography variant="body2" sx={{ mt: 2 }}>
-            {qrValue}
+    <Box sx={{ px: { xs: 1, sm: 3, md: 5 }, py: 2, maxWidth: "1200px", margin: "0 auto" }}>
+      <Paper elevation={3} sx={{ p: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            mb: 2,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: "bold", mb: { xs: 1, sm: 0 } }}>
+            Casas del Fraccionamiento
           </Typography>
-          <Button onClick={() => setOpenQR(false)} variant="contained" sx={{ mt: 2 }}>
-            Cerrar
+          <Button
+            variant="contained"
+            size="small"
+            sx={{ whiteSpace: "nowrap" }}
+            onClick={() => setOpenAddCasa(true)}
+          >
+            Agregar Casa
           </Button>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal Agregar Residente */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)}>
-        <DialogTitle>Agregar Residente</DialogTitle>
-        <DialogContent>
-          <TextField label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
-          <TextField label="Edad" name="edad" type="number" onChange={handleInputChange} fullWidth />
-          <TextField label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenForm(false)} color="secondary">
-            Cancelar
-          </Button>
-          <Button onClick={handleAddResidente} color="primary">
-            Agregar
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Modal Agregar Casa */}
-      <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)}>
-        <DialogTitle>Agregar Casa</DialogTitle>
-        <DialogContent>
-          <TextField label="Número" name="numero" onChange={handleCasaChange} fullWidth />
-          <TextField label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
-          <TextField label="Teléfono" name="telefono" onChange={handleCasaChange} fullWidth />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAddCasa(false)} color="secondary">
-            Cancelar
-          </Button>
-          <Button onClick={handleAddCasa} color="primary">
-            Agregar
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+        </Box>
+  
+        <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>Número</TableCell>
+                <TableCell>QR</TableCell>
+                <TableCell>Agregar</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((row) => (
+                <React.Fragment key={row.id}>
+                  <TableRow>
+                    <TableCell>
+                      <IconButton size="small" onClick={() => toggleRow(row.id)}>
+                        {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>{row.numero}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const fraccId = JSON.parse(localStorage.getItem("user"))._id;
+                          setQrValue(
+                            `https://admin-one-livid.vercel.app/RegistroResidente?id=${fraccId}&casa=${row.numero}`
+                          );
+                          setOpenQR(true);
+                        }}
+                      >
+                        <RemoveRedEyeIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleOpenForm(row)}
+                      >
+                        Agregar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={4} sx={{ px: 1, py: 0 }}>
+                      <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Residentes
+                          </Typography>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Nombre</TableCell>
+                                <TableCell>Edad</TableCell>
+                                <TableCell>Relación</TableCell>
+                                <TableCell>Teléfono</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {row.residentes.map((res, idx) => (
+                                <TableRow key={idx}>
+                                  <TableCell>{res.nombre}</TableCell>
+                                  <TableCell>{res.edad}</TableCell>
+                                  <TableCell>{res.relacion}</TableCell>
+                                  <TableCell>{res.telefono}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </Box>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 }
