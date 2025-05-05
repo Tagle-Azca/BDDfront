@@ -12,47 +12,43 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+const API_URL = process.env.REACT_APP_API_URL_PROD;
 
 function Invitados() {
   const [nombre, setNombre] = useState("");
   const [motivo, setMotivo] = useState("");
   const [residencia, setResidencia] = useState("");
   const [fotoDni, setFotoDni] = useState(null);
-  const [fotoPreview, setFotoPreview] = useState("");
   const [errorGeneral, setErrorGeneral] = useState("");
   const [fotoError, setFotoError] = useState(false);
-  const [searchParams] = useSearchParams();
-  const [fraccId, setFraccId] = useState("");
   const [residencias, setResidencias] = useState([]);
 
+  // Obtener fraccId desde el URL
   useEffect(() => {
-    const id = searchParams.get("id");
-    if (id) {
-      setFraccId(id);
-      fetch(`http://localhost:5002/api/fracc/${id}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.residencias) {
-            const residenciasNumeros = data.residencias.map((casa) => String(casa.numero));
-            setResidencias(residenciasNumeros);
-          }
-        })
-        .catch(err => {
-          console.error("Error al cargar residencias:", err);
-          setErrorGeneral("No se pudieron cargar las residencias.");
-        });
-    } else {
-      setErrorGeneral("ID de fraccionamiento no encontrado.");
-    }
-  }, [searchParams]);
+    const urlParams = new URLSearchParams(window.location.search);
+    const fraccId = urlParams.get("id");
+
+    if (!fraccId) return;
+
+    fetch(`${API_URL}/api/fracc/${fraccId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.residencias) {
+          const lista = data.residencias.map((c) => c.numero);
+          setResidencias(lista);
+        }
+      })
+      .catch((err) => {
+        console.error("Error al cargar residencias:", err);
+      });
+  }, []);
 
   const handleFotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setFotoDni(file);
-      setFotoPreview(URL.createObjectURL(file)); 
       setFotoError(false);
     }
   };
@@ -63,15 +59,21 @@ function Invitados() {
       return;
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const fraccId = urlParams.get("id");
+    if (!fraccId) {
+      setErrorGeneral("ID de fraccionamiento no válido.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("nombre", nombre);
     formData.append("motivo", motivo);
     formData.append("residencia", residencia);
     formData.append("fotoDni", fotoDni);
-    formData.append("fraccId", fraccId);
 
     try {
-      const response = await fetch("http://localhost:5002/api/auth/visitas", {
+      const response = await fetch(`${API_URL}/api/auth/visitas?id=${fraccId}`, {
         method: "POST",
         body: formData,
       });
@@ -119,33 +121,68 @@ function Invitados() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             fullWidth
+            sx={{
+              borderRadius: 3,
+              "& .MuiInputBase-input": { color: "black" },
+              "& .MuiInputLabel-root": { color: "black" },
+            }}
           />
           <TextField
             label="Motivo de la visita"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             fullWidth
+            sx={{
+              borderRadius: 3,
+              "& .MuiInputBase-input": { color: "black" },
+              "& .MuiInputLabel-root": { color: "black" },
+            }}
           />
 
           <FormControl fullWidth>
-            <InputLabel>Residencia</InputLabel>
+            <InputLabel sx={{ color: "black" }}>Residencia</InputLabel>
             <Select
               value={residencia}
               onChange={(e) => setResidencia(e.target.value)}
+              sx={{
+                borderRadius: 3,
+                color: "black",
+                ".MuiSelect-icon": { color: "black" },
+              }}
             >
-              {residencias.map((r) => (
-                <MenuItem key={r} value={r}>{r}</MenuItem>
-              ))}
+              {residencias.length > 0 ? (
+                residencias.map((r) => (
+                  <MenuItem key={r} value={r} sx={{ color: "black" }}>
+                    {r}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled sx={{ color: "gray" }}>
+                  No hay residencias registradas
+                </MenuItem>
+              )}
             </Select>
           </FormControl>
 
-          <Box sx={{ textAlign: "center" }}>
           <Button
             component="label"
             variant="outlined"
-            sx={{ borderRadius: "30px", mb: 1 }}
+            sx={{
+              borderRadius: "30px",
+              height: "3.5rem",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              textTransform: "none",
+              width: "100%",
+              color: "black",
+              borderColor: "black",
+              "&:hover": {
+                backgroundColor: "#e0e0e0",
+                borderColor: "black",
+              },
+            }}
           >
-            {fotoDni ? "Cambiar selfie" : "Tomar selfie"}
+            {fotoDni ? "Foto cargada" : "Tomar selfie"}
             <input
               type="file"
               accept="image/*"
@@ -155,36 +192,9 @@ function Invitados() {
             />
           </Button>
 
-          {fotoPreview && (
-            <Box>
-              <img
-                src={fotoPreview}
-                alt="Vista previa"
-                style={{ width: "100%", borderRadius: 10, marginBottom: 10 }}
-              />
-              <Button
-                color="error"
-                size="small"
-                onClick={() => {
-                  setFotoDni(null);
-                  setFotoPreview("");
-                }}
-              >
-                Eliminar selfie
-              </Button>
-            </Box>
-          )}
-
-          {fotoError && (
-            <Typography color="red" fontWeight="bold" mt={1}>
-              Agrega una identificación
-            </Typography>
-          )}
-        </Box>
-
           {fotoError && (
             <Typography color="red" textAlign="center" fontWeight="bold">
-              Agrega una identificación
+              Agrega una selfie como identificación
             </Typography>
           )}
 
@@ -197,6 +207,10 @@ function Invitados() {
                   backgroundColor: fotoError ? "#cc0000" : "success.dark",
                 },
                 borderRadius: "30px",
+                height: "3.5rem",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                textTransform: "none",
                 width: "70%",
               }}
               onClick={handleSubmit}
