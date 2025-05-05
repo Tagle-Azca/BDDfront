@@ -23,7 +23,7 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-const API_URL = "https://ingresosbackend.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL_PROD;
 
 const CollapsibleTable = () => {
   const [rows, setRows] = useState([]);
