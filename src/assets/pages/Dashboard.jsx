@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import React from "react";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import {
   Dialog,
@@ -19,10 +18,12 @@ import {
   Collapse,
   Box,
   IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import axios from "axios";
+import Navbar from "../commponents/Navbar";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002";
 
@@ -36,6 +37,8 @@ export default function DashboardFracc() {
   const [selectedCasa, setSelectedCasa] = useState(null);
   const [formData, setFormData] = useState({ nombre: "", edad: "", relacion: "" });
   const [newCasa, setNewCasa] = useState({ numero: "", propietario: "", telefono: "" });
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   const fetchData = async () => {
     try {
@@ -53,7 +56,6 @@ export default function DashboardFracc() {
           edad: res.edad,
           relacion: res.relacion,
           telefono: res.telefono || "N/A",
-          qrPersonal: res.qrPersonal,
         })),
       }));
 
@@ -112,30 +114,21 @@ export default function DashboardFracc() {
   };
 
   return (
-    <Box sx={{ px: { xs: 1, sm: 3, md: 5 }, py: 2, maxWidth: "1200px", margin: "0 auto" }}>
-      <Paper elevation={3} sx={{ p: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            mb: 2,
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: { xs: 1, sm: 0 } }}>
+  <>
+    <Navbar/>
+    
+    <Box sx={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "2rem"}}>
+      
+      <Paper sx={{ width: isMobile ? "100%" : "95%", overflow: "hidden", p: isMobile ? 1 : 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap" }}>
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: isMobile ? 1 : 0 }}>
             Casas del Fraccionamiento
           </Typography>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ whiteSpace: "nowrap" }}
-            onClick={() => setOpenAddCasa(true)}
-          >
+          <Button onClick={() => setOpenAddCasa(true)} variant="contained" size="small">
             Agregar Casa
           </Button>
         </Box>
-  
+
         <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
           <Table size="small">
             <TableHead>
@@ -148,8 +141,8 @@ export default function DashboardFracc() {
             </TableHead>
             <TableBody>
               {data.map((row) => (
-                <React.Fragment key={row.id}>
-                  <TableRow>
+                <>
+                  <TableRow key={row.id}>
                     <TableCell>
                       <IconButton size="small" onClick={() => toggleRow(row.id)}>
                         {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -171,11 +164,7 @@ export default function DashboardFracc() {
                       </IconButton>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleOpenForm(row)}
-                      >
+                      <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small">
                         Agregar
                       </Button>
                     </TableCell>
@@ -183,8 +172,8 @@ export default function DashboardFracc() {
                   <TableRow>
                     <TableCell colSpan={4} sx={{ px: 1, py: 0 }}>
                       <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
-                        <Box sx={{ mt: 1 }}>
-                          <Typography variant="subtitle2" fontWeight="bold">
+                        <Box marginY={1}>
+                          <Typography variant="body2" fontWeight="bold" gutterBottom>
                             Residentes
                           </Typography>
                           <Table size="small">
@@ -211,12 +200,63 @@ export default function DashboardFracc() {
                       </Collapse>
                     </TableCell>
                   </TableRow>
-                </React.Fragment>
+                </>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Modal QR */}
+        <Dialog open={openQR} onClose={() => setOpenQR(false)}>
+          <DialogTitle sx={{ fontSize: 16 }}>QR de Registro</DialogTitle>
+          <DialogContent>
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                qrValue
+              )}`}
+              alt="QR"
+              style={{ margin: "auto", display: "block" }}
+            />
+            <Typography variant="caption" sx={{ mt: 1, textAlign: "center" }}>
+              {qrValue}
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenQR(false)} variant="contained" size="small">
+              Cerrar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal Agregar Residente */}
+        <Dialog open={openForm} onClose={() => setOpenForm(false)}>
+          <DialogTitle sx={{ fontSize: 16 }}>Agregar Residente</DialogTitle>
+          <DialogContent>
+            <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
+            <TextField size="small" label="Edad" name="edad" type="number" onChange={handleInputChange} fullWidth />
+            <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenForm(false)} size="small">Cancelar</Button>
+            <Button onClick={handleAddResidente} size="small">Agregar</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal Agregar Casa */}
+        <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)}>
+          <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
+          <DialogContent>
+            <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
+            <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
+            <TextField size="small" label="Teléfono" name="telefono" onChange={handleCasaChange} fullWidth />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>
+            <Button onClick={handleAddCasa} size="small">Agregar</Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </Box>
+  </>
   );
 }
