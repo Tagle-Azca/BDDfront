@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import AddIcon from "@mui/icons-material/Add";
 import {
   Dialog,
   DialogTitle,
@@ -114,145 +115,167 @@ export default function DashboardFracc() {
   };
 
   return (
-  <>
-    <Navbar/>
-    
-    <Box sx={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "2rem"}}>
-      <Paper sx={{ width: isMobile ? "100%" : "95%", overflow: "hidden", p: isMobile ? 1 : 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap" }}>
-          <Typography variant="h6" fontWeight="bold">
-            Casas del Fraccionamiento
-          </Typography>
-          <Button onClick={() => setOpenAddCasa(true)} variant="contained" size="small" style={{backgroundColor:"#0ba969"}}>
-            Agregar Casa
-          </Button>
-        </Box>
-
-        <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell />
-                <TableCell>Residencia</TableCell>
-                <TableCell>QR</TableCell>
-                <TableCell>Agregar</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.map((row) => (
-                <>
-                  <TableRow key={row.id}>
-                    <TableCell>
-                      <IconButton size="small" onClick={() => toggleRow(row.id)}>
-                        {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                      </IconButton>
-                    </TableCell>
-                    <TableCell>{row.numero}</TableCell>
-                    <TableCell>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          const fraccId = JSON.parse(localStorage.getItem("user"))._id;
-                          setQrValue(
-                            `https://admin-one-livid.vercel.app/RegistroResidente?id=${fraccId}&casa=${row.numero}`
-                          );
-                          setOpenQR(true);
-                        }}
-                      >
-                        <RemoveRedEyeIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small">
-                        Agregar
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={4} sx={{ px: 1, py: 0 }}>
-                      <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
-                        <Box marginY={1}>
-                          <Typography variant="body2" fontWeight="bold" gutterBottom>
-                            Residentes
-                          </Typography>
-                          <Table size="small">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Nombre</TableCell>
-                                <TableCell>Relación</TableCell>
-                                <TableCell>Teléfono</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {row.residentes.map((res, idx) => (
-                                <TableRow key={idx}>
-                                  <TableCell>{res.nombre}</TableCell>
-                                  <TableCell>{res.relacion}</TableCell>
-                                  <TableCell>{res.telefono}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </Box>
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                </>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        {/* Modal QR */}
-        <Dialog open={openQR} onClose={() => setOpenQR(false)}>
-          <DialogTitle sx={{ fontSize: 16 }}>QR de Registro</DialogTitle>
-          <DialogContent>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                qrValue
-              )}`}
-              alt="QR"
-              style={{ margin: "auto", display: "block" }}
-            />
-            <Typography variant="caption" sx={{ mt: 1, textAlign: "center" }}>
-              {qrValue}
+    <>
+      <Navbar />
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 3 }}>
+        <Paper
+          elevation={3}
+          sx={{
+            maxWidth: "1200px",
+            width: "100%",
+            mx: "auto",
+            p: isMobile ? 1.5 : 3,
+            borderRadius: 3,
+            boxShadow: 3,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              mb: 2,
+            }}
+          >
+            <Typography variant={isMobile ? "h6" : "h5"} fontWeight="600" color="black">
+              Casas del Fraccionamiento
             </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenQR(false)} variant="contained" size="small">
-              Cerrar
+            <Button
+              onClick={() => setOpenAddCasa(true)}
+              variant="contained"
+              size={isMobile ? "small" : "medium"}
+              startIcon={<AddIcon />}
+              sx={{ bgcolor: "#0ba969", ":hover": { bgcolor: "#0a8d5d" } }}
+            >
+              Agregar Casa
             </Button>
-          </DialogActions>
-        </Dialog>
+          </Box>
 
-        {/* Modal Agregar Residente */}
-        <Dialog open={openForm} onClose={() => setOpenForm(false)}>
-          <DialogTitle sx={{ fontSize: 16 }}>Agregar Residente</DialogTitle>
-          <DialogContent>
-            <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
-            <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenForm(false)} size="small">Cancelar</Button>
-            <Button onClick={handleAddResidente} size="small">Agregar</Button>
-          </DialogActions>
-        </Dialog>
+          <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>Residencia</TableCell>
+                  <TableCell>QR</TableCell>
+                  <TableCell>Agregar</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.map((row) => (
+                  <>
+                    <TableRow key={row.id}>
+                      <TableCell>
+                        <IconButton size="small" onClick={() => toggleRow(row.id)}>
+                          {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>{row.numero}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const fraccId = JSON.parse(localStorage.getItem("user"))._id;
+                            setQrValue(
+                              `https://admin-one-livid.vercel.app/RegistroResidente?id=${fraccId}&casa=${row.numero}`
+                            );
+                            setOpenQR(true);
+                          }}
+                        >
+                          <RemoveRedEyeIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small">
+                          Agregar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={4} sx={{ px: 1, py: 0 }}>
+                        <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
+                          <Box marginY={1}>
+                            <Typography variant="body2" fontWeight="bold" gutterBottom>
+                              Residentes
+                            </Typography>
+                            <Table size="small">
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>Nombre</TableCell>
+                                  <TableCell>Relación</TableCell>
+                                  <TableCell>Teléfono</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {row.residentes.map((res, idx) => (
+                                  <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
+                                    <TableCell>{res.nombre}</TableCell>
+                                    <TableCell>{res.relacion}</TableCell>
+                                    <TableCell>{res.telefono}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-        {/* Modal Agregar Casa */}
-        <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)}>
-          <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
-          <DialogContent>
-            <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
-            <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
-            <TextField size="small" label="Teléfono" name="telefono" onChange={handleCasaChange} fullWidth />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>
-            <Button onClick={handleAddCasa} size="small">Agregar</Button>
-          </DialogActions>
-        </Dialog>
-      </Paper>
-    </Box>
-  </>
+          <Dialog open={openQR} onClose={() => setOpenQR(false)}>
+            <DialogTitle sx={{ fontSize: 16 }}>QR de Registro</DialogTitle>
+            <DialogContent sx={{ textAlign: "center" }}>
+              <Box sx={{ p: 2, bgcolor: "#fff", borderRadius: 2, boxShadow: 2 }}>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                    qrValue
+                  )}`}
+                  alt="QR"
+                  style={{ display: "block", margin: "0 auto" }}
+                />
+                <Typography variant="caption" sx={{ mt: 2, wordBreak: "break-all" }}>
+                  {qrValue}
+                </Typography>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenQR(false)} variant="contained" size="small">
+                Cerrar
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          <Dialog open={openForm} onClose={() => setOpenForm(false)}>
+            <DialogTitle sx={{ fontSize: 16 }}>Agregar Residente</DialogTitle>
+            <DialogContent>
+              <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
+              <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenForm(false)} size="small">Cancelar</Button>
+              <Button onClick={handleAddResidente} size="small">Agregar</Button>
+            </DialogActions>
+          </Dialog>
+
+          <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)}>
+            <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
+            <DialogContent>
+              <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
+              <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
+              <TextField size="small" label="Teléfono" name="telefono" onChange={handleCasaChange} fullWidth />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>
+              <Button onClick={handleAddCasa} size="small">Agregar</Button>
+            </DialogActions>
+          </Dialog>
+        </Paper>
+      </Box>
+    </>
   );
 }
