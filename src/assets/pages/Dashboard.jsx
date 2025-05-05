@@ -1,5 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Collapse,
+  Box,
+  Typography,
+  IconButton,
+} from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002";
 
@@ -43,47 +58,75 @@ export default function FraccAdminTable() {
   };
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Número</th>
-          <th>Propietario</th>
-          <th>Teléfono</th>
-          <th>Número de Residentes</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((casa) => (
-          <tr key={casa.id}>
-            <td>{casa.numero}</td>
-            <td>{casa.propietario}</td>
-            <td>{casa.telefono}</td>
-            <td>{casa.residentes.length}</td>
-            <td>
-              <button onClick={() => toggleRow(casa.id)}>
-                {openRow === casa.id ? "Ocultar Residentes" : "Ver Residentes"}
-              </button>
-            </td>
-          </tr>
-        ))}
-        {data.map(
-          (casa) =>
-            openRow === casa.id && (
-              <tr key={`residentes-${casa.id}`}>
-                <td colSpan="5">
-                  <ul>
-                    {casa.residentes.map((residente, idx) => (
-                      <li key={idx}>
-                        {residente.nombre} ({residente.relacion}) - {residente.telefono}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-              </tr>
-            )
-        )}
-      </tbody>
-    </table>
+    <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
+      <Typography variant="h6" gutterBottom component="div">
+        Casas del Fraccionamiento
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table aria-label="collapsible table">
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>Número</TableCell>
+              <TableCell>Propietario</TableCell>
+              <TableCell>Teléfono</TableCell>
+              <TableCell># Residentes</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.map((row) => (
+              <>
+                <TableRow key={row.id}>
+                  <TableCell>
+                    <IconButton
+                      aria-label="expand row"
+                      size="small"
+                      onClick={() => toggleRow(row.id)}
+                    >
+                      {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                  </TableCell>
+                  <TableCell>{row.numero}</TableCell>
+                  <TableCell>{row.propietario}</TableCell>
+                  <TableCell>{row.telefono}</TableCell>
+                  <TableCell>{row.residentes.length}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
+                    <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
+                      <Box margin={1}>
+                        <Typography variant="subtitle1" gutterBottom component="div">
+                          Residentes
+                        </Typography>
+                        <Table size="small" aria-label="residents">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Nombre</TableCell>
+                              <TableCell>Edad</TableCell>
+                              <TableCell>Relación</TableCell>
+                              <TableCell>Teléfono</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {row.residentes.map((res, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell>{res.nombre}</TableCell>
+                                <TableCell>{res.edad}</TableCell>
+                                <TableCell>{res.relacion}</TableCell>
+                                <TableCell>{res.telefono}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </Box>
+                    </Collapse>
+                  </TableCell>
+                </TableRow>
+              </>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 }
