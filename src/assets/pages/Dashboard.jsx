@@ -26,7 +26,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import axios from "axios";
 import Navbar from "../commponents/Navbar";
 
-const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002";
+const API_URL = process.env.REACT_APP_API_URL_PROD;
 
 export default function DashboardFracc() {
   const [data, setData] = useState([]);
