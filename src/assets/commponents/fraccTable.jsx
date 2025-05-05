@@ -34,7 +34,6 @@ const CollapsibleTable = () => {
   const [search, setSearch] = useState("");
   const [formData, setFormData] = useState({
     nombre: "",
-    edad: "",
     telefono: "",
   });
 
@@ -58,7 +57,6 @@ const CollapsibleTable = () => {
             fraccionamiento: item.fraccionamiento,
             residentes: item.residentes.map((residente) => ({
               nombre: residente.nombre,
-              edad: residente.edad,
               telefono: residente.telefono,
               _id: residente._id,
             })),
@@ -93,7 +91,7 @@ const CollapsibleTable = () => {
 
   const handleOpenForm = (row) => {
     setSelectedRow(row);
-    setFormData({ nombre: "", edad: "", telefono: "" });
+    setFormData({ nombre: "", telefono: "" });
     setOpenForm(true);
   };
 
@@ -174,7 +172,6 @@ const CollapsibleTable = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>Nombre</TableCell>
-                      <TableCell>Edad</TableCell>
                       <TableCell>Teléfono</TableCell>
                     </TableRow>
                   </TableHead>
@@ -182,7 +179,6 @@ const CollapsibleTable = () => {
                     {row.residentes.map((residente) => (
                       <TableRow key={residente._id}>
                         <TableCell>{residente.nombre}</TableCell>
-                        <TableCell>{residente.edad}</TableCell>
                         <TableCell>{residente.telefono}</TableCell>
                       </TableRow>
                     ))}
@@ -250,7 +246,6 @@ const CollapsibleTable = () => {
         <DialogTitle>Agregar Residente</DialogTitle>
         <DialogContent>
           <TextField label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
-          <TextField label="Edad" name="edad" type="number" onChange={handleInputChange} fullWidth />
           <TextField label="Teléfono" name="telefono" onChange={handleInputChange} fullWidth />
         </DialogContent>
         <DialogActions>
