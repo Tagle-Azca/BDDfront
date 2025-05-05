@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import { Dialog, DialogTitle, DialogContent, Button } from "@mui/material";
 import axios from "axios";
 import {
   Paper,
@@ -21,6 +23,9 @@ const API_URL = process.env.REACT_APP_API_URL_PROD || "http://localhost:5002";
 export default function DashboardFracc() {
   const [data, setData] = useState([]);
   const [openRow, setOpenRow] = useState(null);
+
+  const [openQR, setOpenQR] = useState(false);
+  const [qrValue, setQrValue] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +77,7 @@ export default function DashboardFracc() {
               <TableCell>Propietario</TableCell>
               <TableCell>Teléfono</TableCell>
               <TableCell># Residentes</TableCell>
+              <TableCell>QR</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -91,6 +97,15 @@ export default function DashboardFracc() {
                   <TableCell>{row.propietario}</TableCell>
                   <TableCell>{row.telefono}</TableCell>
                   <TableCell>{row.residentes.length}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => {
+                      const fraccId = JSON.parse(localStorage.getItem("user"))._id;
+                      setQrValue(`https://admin-one-livid.vercel.app/RegistroResidente?id=${fraccId}&casa=${row.numero}`);
+                      setOpenQR(true);
+                    }}>
+                      <RemoveRedEyeIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -128,6 +143,16 @@ export default function DashboardFracc() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog open={openQR} onClose={() => setOpenQR(false)}>
+        <DialogTitle>QR de Registro</DialogTitle>
+        <DialogContent>
+          <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrValue)}`} alt="QR" />
+          <Typography variant="body2" sx={{ mt: 2 }}>{qrValue}</Typography>
+          <Button onClick={() => setOpenQR(false)} variant="contained" sx={{ mt: 2 }}>
+            Cerrar
+          </Button>
+        </DialogContent>
+      </Dialog>
     </Paper>
   );
 }

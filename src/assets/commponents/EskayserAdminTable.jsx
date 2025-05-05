@@ -119,6 +119,7 @@ export default function TableAdmin() {
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
+      
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <TextField
           label="Buscar..."
