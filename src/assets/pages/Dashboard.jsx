@@ -118,13 +118,12 @@ export default function DashboardFracc() {
     <Navbar/>
     
     <Box sx={{ width: "100%", display: "flex", justifyContent: "center", marginTop: "2rem"}}>
-      
       <Paper sx={{ width: isMobile ? "100%" : "95%", overflow: "hidden", p: isMobile ? 1 : 3 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap" }}>
-          <Typography variant="h6" fontWeight="bold" sx={{ mb: isMobile ? 1 : 0 }}>
+          <Typography variant="h6" fontWeight="bold">
             Casas del Fraccionamiento
           </Typography>
-          <Button onClick={() => setOpenAddCasa(true)} variant="contained" size="small">
+          <Button onClick={() => setOpenAddCasa(true)} variant="contained" size="small" style={{backgroundColor:"#0ba969"}}>
             Agregar Casa
           </Button>
         </Box>
@@ -134,7 +133,7 @@ export default function DashboardFracc() {
             <TableHead>
               <TableRow>
                 <TableCell />
-                <TableCell>Número</TableCell>
+                <TableCell>Residencia</TableCell>
                 <TableCell>QR</TableCell>
                 <TableCell>Agregar</TableCell>
               </TableRow>
@@ -180,7 +179,6 @@ export default function DashboardFracc() {
                             <TableHead>
                               <TableRow>
                                 <TableCell>Nombre</TableCell>
-                                <TableCell>Edad</TableCell>
                                 <TableCell>Relación</TableCell>
                                 <TableCell>Teléfono</TableCell>
                               </TableRow>
@@ -189,7 +187,6 @@ export default function DashboardFracc() {
                               {row.residentes.map((res, idx) => (
                                 <TableRow key={idx}>
                                   <TableCell>{res.nombre}</TableCell>
-                                  <TableCell>{res.edad}</TableCell>
                                   <TableCell>{res.relacion}</TableCell>
                                   <TableCell>{res.telefono}</TableCell>
                                 </TableRow>
@@ -233,7 +230,6 @@ export default function DashboardFracc() {
           <DialogTitle sx={{ fontSize: 16 }}>Agregar Residente</DialogTitle>
           <DialogContent>
             <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
-            <TextField size="small" label="Edad" name="edad" type="number" onChange={handleInputChange} fullWidth />
             <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
           </DialogContent>
           <DialogActions>
