@@ -31,8 +31,10 @@ export default function DashboardFracc() {
   const [openQR, setOpenQR] = useState(false);
   const [qrValue, setQrValue] = useState("");
   const [openForm, setOpenForm] = useState(false);
+  const [openAddCasa, setOpenAddCasa] = useState(false);
   const [selectedCasa, setSelectedCasa] = useState(null);
   const [formData, setFormData] = useState({ nombre: "", edad: "", relacion: "" });
+  const [newCasa, setNewCasa] = useState({ numero: "", propietario: "", telefono: "" });
 
   const fetchData = async () => {
     try {
@@ -71,6 +73,11 @@ export default function DashboardFracc() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleCasaChange = (e) => {
+    const { name, value } = e.target;
+    setNewCasa((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleOpenForm = (row) => {
     setSelectedCasa(row);
     setOpenForm(true);
@@ -79,7 +86,7 @@ export default function DashboardFracc() {
   const handleAddResidente = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const response = await axios.post(
+      await axios.post(
         `${API_URL}/api/fracc/${user._id}/casas/${selectedCasa.numero}/residentes`,
         formData
       );
@@ -91,11 +98,26 @@ export default function DashboardFracc() {
     }
   };
 
+  const handleAddCasa = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      await axios.post(`${API_URL}/api/fracc/${user._id}/casas`, newCasa);
+      setNewCasa({ numero: "", propietario: "", telefono: "" });
+      setOpenAddCasa(false);
+      fetchData();
+    } catch (error) {
+      console.error("❌ Error al agregar casa:", error);
+    }
+  };
+
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Casas del Fraccionamiento
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h6">Casas del Fraccionamiento</Typography>
+        <Button onClick={() => setOpenAddCasa(true)} variant="contained">
+          Agregar Casa
+        </Button>
+      </Box>
 
       <TableContainer component={Paper}>
         <Table>
@@ -103,9 +125,6 @@ export default function DashboardFracc() {
             <TableRow>
               <TableCell />
               <TableCell>Número</TableCell>
-              <TableCell>Propietario</TableCell>
-              <TableCell>Teléfono</TableCell>
-              <TableCell># Residentes</TableCell>
               <TableCell>QR</TableCell>
               <TableCell>Agregar</TableCell>
             </TableRow>
@@ -120,9 +139,6 @@ export default function DashboardFracc() {
                     </IconButton>
                   </TableCell>
                   <TableCell>{row.numero}</TableCell>
-                  <TableCell>{row.propietario}</TableCell>
-                  <TableCell>{row.telefono}</TableCell>
-                  <TableCell>{row.residentes.length}</TableCell>
                   <TableCell>
                     <IconButton
                       onClick={() => {
@@ -143,7 +159,7 @@ export default function DashboardFracc() {
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell colSpan={7} style={{ paddingBottom: 0, paddingTop: 0 }}>
+                  <TableCell colSpan={4} style={{ paddingBottom: 0, paddingTop: 0 }}>
                     <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
                       <Box margin={2}>
                         <Typography variant="subtitle1">Residentes</Typography>
@@ -209,6 +225,24 @@ export default function DashboardFracc() {
             Cancelar
           </Button>
           <Button onClick={handleAddResidente} color="primary">
+            Agregar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal Agregar Casa */}
+      <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)}>
+        <DialogTitle>Agregar Casa</DialogTitle>
+        <DialogContent>
+          <TextField label="Número" name="numero" onChange={handleCasaChange} fullWidth />
+          <TextField label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
+          <TextField label="Teléfono" name="telefono" onChange={handleCasaChange} fullWidth />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddCasa(false)} color="secondary">
+            Cancelar
+          </Button>
+          <Button onClick={handleAddCasa} color="primary">
             Agregar
           </Button>
         </DialogActions>
