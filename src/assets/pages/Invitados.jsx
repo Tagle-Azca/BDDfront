@@ -25,11 +25,24 @@ function Invitados() {
   const [fotoError, setFotoError] = useState(false);
   const [searchParams] = useSearchParams();
   const [fraccId, setFraccId] = useState("");
+  const [residencias, setResidencias] = useState([]);
 
   useEffect(() => {
     const id = searchParams.get("id");
     if (id) {
       setFraccId(id);
+      fetch(`http://localhost:5002/api/fracc/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.residencias) {
+            const residenciasNumeros = data.residencias.map((casa) => String(casa.numero));
+            setResidencias(residenciasNumeros);
+          }
+        })
+        .catch(err => {
+          console.error("Error al cargar residencias:", err);
+          setErrorGeneral("No se pudieron cargar las residencias.");
+        });
     } else {
       setErrorGeneral("ID de fraccionamiento no encontrado.");
     }
@@ -120,10 +133,9 @@ function Invitados() {
               value={residencia}
               onChange={(e) => setResidencia(e.target.value)}
             >
-              <MenuItem value="Casa 1">Casa 1</MenuItem>
-              <MenuItem value="Casa 2">Casa 2</MenuItem>
-              <MenuItem value="Depto 101">Depto 101</MenuItem>
-              {/* Podrías llenar esto dinámicamente desde el backend */}
+              {residencias.map((r) => (
+                <MenuItem key={r} value={r}>{r}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 

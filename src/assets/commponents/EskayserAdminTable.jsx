@@ -61,7 +61,7 @@ export default function TableAdmin() {
         telefono: item.telefono || "Sin teléfono",
         estado: item.estado || "activo",
         fechaExpiracion: item.fechaExpiracion ? new Date(item.fechaExpiracion).toLocaleDateString() : "No disponible",
-        qr: item.qr || "No disponible",
+        qr: item.qrVisitas || "No disponible",
       }));
 
       setRows(data);
