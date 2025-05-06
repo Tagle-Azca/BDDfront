@@ -33,7 +33,7 @@ const AgregarFraccionamientoModal = ({ open, handleClose, fetchData }) => {
         estado: formData.estado,
       };
 
-      const response = await axios.post(`${API_URL}/fracc/add`, payload);
+      const response = await axios.post(`${API_URL}/fracc`, payload);
       console.log("Fraccionamiento agregado:", response.data);
       fetchData();
       handleClose();
