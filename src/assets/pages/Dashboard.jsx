@@ -37,7 +37,7 @@ export default function DashboardFracc() {
   const [openAddCasa, setOpenAddCasa] = useState(false);
   const [selectedCasa, setSelectedCasa] = useState(null);
   const [formData, setFormData] = useState({ nombre: "", relacion: "" });
-  const [newCasa, setNewCasa] = useState({ numero: "", propietario: "", telefono: "" });
+  const [newCasa, setNewCasa] = useState({ numero: "", propietario: "" });
 
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -51,12 +51,10 @@ export default function DashboardFracc() {
         id: index + 1,
         numero: casa.numero,
         propietario: casa.propietario,
-        telefono: casa.telefono,
         residentes: casa.residentes.map((res) => ({
           nombre: res.nombre,
           edad: res.edad,
           relacion: res.relacion,
-          telefono: res.telefono || "N/A",
         })),
       }));
 
@@ -106,7 +104,7 @@ export default function DashboardFracc() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       await axios.post(`${API_URL}/api/fracc/${user._id}/casas`, newCasa);
-      setNewCasa({ numero: "", propietario: "", telefono: "" });
+      setNewCasa({ numero: "", propietario: ""});
       setOpenAddCasa(false);
       fetchData();
     } catch (error) {
@@ -204,7 +202,6 @@ export default function DashboardFracc() {
                                 <TableRow>
                                   <TableCell>Nombre</TableCell>
                                   <TableCell>Relación</TableCell>
-                                  <TableCell>Teléfono</TableCell>
                                 </TableRow>
                               </TableHead>
                               <TableBody>
@@ -212,7 +209,6 @@ export default function DashboardFracc() {
                                   <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
                                     <TableCell>{res.nombre}</TableCell>
                                     <TableCell>{res.relacion}</TableCell>
-                                    <TableCell>{res.telefono}</TableCell>
                                   </TableRow>
                                 ))}
                               </TableBody>
@@ -267,7 +263,6 @@ export default function DashboardFracc() {
             <DialogContent>
               <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
               <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
-              <TextField size="small" label="Teléfono" name="telefono" onChange={handleCasaChange} fullWidth />
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>
