@@ -176,7 +176,7 @@ export default function DashboardFracc() {
                           onClick={() => {
                             const fraccId = JSON.parse(localStorage.getItem("user"))._id;
                             setQrValue(
-                              `https://admin-one-livid.vercel.app/RegistroResidente?id=${fraccId}&casa=${row.numero}`
+                              `https://registro.eskayser.app?id=${fraccId}&casa=${row.numero}`
                             );
                             setOpenQR(true);
                           }}
