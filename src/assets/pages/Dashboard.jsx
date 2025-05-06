@@ -36,7 +36,7 @@ export default function DashboardFracc() {
   const [openForm, setOpenForm] = useState(false);
   const [openAddCasa, setOpenAddCasa] = useState(false);
   const [selectedCasa, setSelectedCasa] = useState(null);
-  const [formData, setFormData] = useState({ nombre: "", edad: "", relacion: "" });
+  const [formData, setFormData] = useState({ nombre: "", relacion: "" });
   const [newCasa, setNewCasa] = useState({ numero: "", propietario: "", telefono: "" });
 
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -255,7 +255,6 @@ export default function DashboardFracc() {
             <DialogContent>
               <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
               <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
-              <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />  
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenForm(false)} size="small">Cancelar</Button>
