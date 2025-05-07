@@ -25,7 +25,7 @@ function Invitados() {
   const [fotoError, setFotoError] = useState(false);
   const [residencias, setResidencias] = useState([]);
 
-  // Obtener fraccId desde el URL
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const fraccId = urlParams.get("id");
