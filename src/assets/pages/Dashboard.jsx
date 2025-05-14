@@ -201,14 +201,12 @@ export default function DashboardFracc() {
                               <TableHead>
                                 <TableRow>
                                   <TableCell>Nombre</TableCell>
-                                  <TableCell>Relación</TableCell>
                                 </TableRow>
                               </TableHead>
                               <TableBody>
                                 {row.residentes.map((res, idx) => (
                                   <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
                                     <TableCell>{res.nombre}</TableCell>
-                                    <TableCell>{res.relacion}</TableCell>
                                   </TableRow>
                                 ))}
                               </TableBody>
@@ -262,7 +260,6 @@ export default function DashboardFracc() {
             <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
             <DialogContent>
               <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
-              <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>

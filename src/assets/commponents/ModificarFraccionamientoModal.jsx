@@ -49,8 +49,8 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       Object.entries(formData).filter(([key, value]) => value.trim() !== "")
     );
   
-    console.log("📌 URL de actualización que se enviará:", requestUrl);
-    console.log("📥 Datos enviados al backend (filtrados):", updateData);
+    console.log("URL de actualización que se enviará:", requestUrl);
+    console.log("Datos enviados al backend (filtrados):", updateData);
   
     try {
       const response = await axios.put(requestUrl, updateData);
@@ -58,7 +58,7 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       fetchData();
       handleClose();
     } catch (error) {
-      console.error("❌ Error al actualizar fraccionamiento:", error.response?.data || error.message);
+      console.error("Error al actualizar fraccionamiento:", error.response?.data || error.message);
     }
   };
 

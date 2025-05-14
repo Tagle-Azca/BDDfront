@@ -9,7 +9,6 @@ function App() {
   return (
     <Router>
       <Routes>
-
         <Route path="/" element={<Login />} />
         <Route path="/dashboard/:id" element={<FraccDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
