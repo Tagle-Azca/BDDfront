@@ -73,7 +73,7 @@ function Invitados() {
     formData.append("fotoDni", fotoDni);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/visitas?id=${fraccId}`, {
+      const response = await fetch(`${API_URL}/api/fracc/${fraccId}/casas/${residencia}/visitas`, {
         method: "POST",
         body: formData,
       });
