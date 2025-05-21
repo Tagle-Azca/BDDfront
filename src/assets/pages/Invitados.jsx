@@ -22,8 +22,10 @@ function Invitados() {
   const [residencia, setResidencia] = useState("");
   const [fotoDni, setFotoDni] = useState(null);
   const [errorGeneral, setErrorGeneral] = useState("");
+  const [exito, setExito] = useState("");
   const [fotoError, setFotoError] = useState(false);
   const [residencias, setResidencias] = useState([]);
+  const [loading, setLoading] = useState(false);
 
 
   useEffect(() => {
@@ -54,6 +56,13 @@ function Invitados() {
   };
 
   const handleSubmit = async () => {
+    setErrorGeneral("");
+    setExito("");
+    if (!nombre || !motivo || !residencia) {
+      setErrorGeneral("Por favor, completa todos los campos.");
+      return;
+    }
+
     if (!fotoDni) {
       setFotoError(true);
       return;
@@ -73,6 +82,7 @@ function Invitados() {
     formData.append("fotoDni", fotoDni);
 
     try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/api/fracc/${fraccId}/casas/${residencia}/visitas`, {
         method: "POST",
         body: formData,
@@ -82,8 +92,11 @@ function Invitados() {
 
       if (!response.ok) {
         setErrorGeneral(data.error || "Error desconocido");
+        setLoading(false);
         return;
       }
+
+      setExito(data.mensaje || "Visita registrada con éxito");
 
       setNombre("");
       setMotivo("");
@@ -91,8 +104,10 @@ function Invitados() {
       setFotoDni(null);
       setErrorGeneral("");
       setFotoError(false);
+      setLoading(false);
     } catch (err) {
       setErrorGeneral("Error al mandar la solicitud");
+      setLoading(false);
     }
   };
 
@@ -115,6 +130,7 @@ function Invitados() {
           </Typography>
 
           {errorGeneral && <Alert severity="error">{errorGeneral}</Alert>}
+          {exito && <Alert severity="success">{exito}</Alert>}
 
           <TextField
             label="Nombre del visitante"
@@ -201,6 +217,7 @@ function Invitados() {
           <Box textAlign="center">
             <Button
               variant="contained"
+              disabled={loading}
               sx={{
                 backgroundColor: fotoError ? "red" : "success.main",
                 "&:hover": {
@@ -215,7 +232,7 @@ function Invitados() {
               }}
               onClick={handleSubmit}
             >
-              Registrar Visita
+              {loading ? "Enviando..." : "Registrar Visita"}
             </Button>
           </Box>
         </CardContent>
