@@ -48,12 +48,20 @@ function Invitados() {
   }, []);
 
   const handleFotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFotoDni(file);
-      setFotoError(false);
+  const file = e.target.files[0];
+  if (file) {
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+      setFotoError(true);
+      setErrorGeneral("Solo se permiten imágenes JPG o PNG");
+      return;
     }
-  };
+
+    setFotoDni(file);
+    setFotoError(false);
+    setErrorGeneral("");
+  }
+};
 
   const handleSubmit = async () => {
     setErrorGeneral("");
