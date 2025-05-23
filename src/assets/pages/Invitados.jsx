@@ -20,7 +20,7 @@ function Invitados() {
   const [nombre, setNombre] = useState("");
   const [motivo, setMotivo] = useState("");
   const [residencia, setResidencia] = useState("");
-  const [fotoDni, setFotoDni] = useState(null);
+  const [FotoVisita, setFotoVisita] = useState(null);
   const [errorGeneral, setErrorGeneral] = useState("");
   const [exito, setExito] = useState("");
   const [fotoError, setFotoError] = useState(false);
@@ -37,11 +37,13 @@ function Invitados() {
     fetch(`${API_URL}/api/fracc/${fraccId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.residencias) {
-          const lista = data.residencias.map((c) => c.numero);
-          setResidencias(lista);
-        }
-      })
+  if (data.residencias) {
+    const lista = data.residencias
+      .filter((c) => c.activa === true)
+      .map((c) => c.numero);
+    setResidencias(lista);
+  }
+})
       .catch((err) => {
         console.error("Error al cargar residencias:", err);
       });
@@ -57,7 +59,7 @@ function Invitados() {
       return;
     }
 
-    setFotoDni(file);
+    setFotoVisita(file);
     setFotoError(false);
     setErrorGeneral("");
   }
@@ -71,7 +73,7 @@ function Invitados() {
       return;
     }
 
-    if (!fotoDni) {
+    if (!FotoVisita) {
       setFotoError(true);
       return;
     }
@@ -87,7 +89,7 @@ function Invitados() {
     formData.append("nombre", nombre);
     formData.append("motivo", motivo);
     formData.append("residencia", residencia);
-    formData.append("fotoDni", fotoDni);
+    formData.append("FotoVisita", FotoVisita);
 
     try {
       setLoading(true);
@@ -109,7 +111,7 @@ function Invitados() {
       setNombre("");
       setMotivo("");
       setResidencia("");
-      setFotoDni(null);
+      setFotoVisita(null);
       setErrorGeneral("");
       setFotoError(false);
       setLoading(false);
@@ -206,7 +208,7 @@ function Invitados() {
               },
             }}
           >
-            {fotoDni ? "Foto cargada" : "Tomar selfie"}
+            {FotoVisita ? "Foto cargada" : "Tomar selfie"}
             <input
               type="file"
               accept="image/*"

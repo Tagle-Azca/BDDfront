@@ -4,6 +4,7 @@ import Login from "./assets/pages/Login";
 import FraccDashboard from "./assets/pages/Dashboard";
 import AdminDashboard from "./assets/pages/Admin";
 import Invitados from "./assets/pages/Invitados"
+import ReportesAdmin from "./assets/pages/ReportesAdmin";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/dashboard/:id" element={<FraccDashboard />} />
+        <Route path="/reportes/:id" element={<ReportesAdmin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/Visitas" element={<Invitados />} />
       </Routes>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import AddIcon from "@mui/icons-material/Add";
 import {
@@ -41,6 +42,10 @@ export default function DashboardFracc() {
 
   const isMobile = useMediaQuery("(max-width:600px)");
 
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?._id;
+
   const fetchData = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -51,6 +56,7 @@ export default function DashboardFracc() {
         id: index + 1,
         numero: casa.numero,
         propietario: casa.propietario,
+        activa: casa.activa, // nuevo campo
         residentes: casa.residentes.map((res) => ({
           nombre: res.nombre,
           edad: res.edad,
@@ -112,6 +118,17 @@ export default function DashboardFracc() {
     }
   };
 
+  // Nueva función para activar/desactivar casa
+  const toggleCasaActiva = async (numero) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      await axios.put(`${API_URL}/api/fracc/${user._id}/casas/${numero}/toggle`);
+      fetchData();
+    } catch (error) {
+      console.error("❌ Error al cambiar estado de la casa:", error);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -139,15 +156,25 @@ export default function DashboardFracc() {
             <Typography variant={isMobile ? "h6" : "h5"} fontWeight="600" color="black">
               Casas del Fraccionamiento
             </Typography>
-            <Button
-              onClick={() => setOpenAddCasa(true)}
-              variant="contained"
-              size={isMobile ? "small" : "medium"}
-              startIcon={<AddIcon />}
-              sx={{ bgcolor: "#0ba969", ":hover": { bgcolor: "#0a8d5d" } }}
-            >
-              Agregar Casa
-            </Button>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Button
+                onClick={() => setOpenAddCasa(true)}
+                variant="contained"
+                size={isMobile ? "small" : "medium"}
+                startIcon={<AddIcon />}
+                sx={{ bgcolor: "#0ba969", ":hover": { bgcolor: "#0a8d5d" } }}
+              >
+                Agregar Casa
+              </Button>
+              <Button
+                onClick={() => navigate(`/reportes/${userId}`)}
+                variant="outlined"
+                size={isMobile ? "small" : "medium"}
+                sx={{ ml: 2 }}
+              >
+                Ver Reportes
+              </Button>
+            </Box>
           </Box>
 
           <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
@@ -158,6 +185,7 @@ export default function DashboardFracc() {
                   <TableCell>Residencia</TableCell>
                   <TableCell>QR</TableCell>
                   <TableCell>Agregar</TableCell>
+                  <TableCell>Activa</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -189,9 +217,19 @@ export default function DashboardFracc() {
                           Agregar
                         </Button>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => toggleCasaActiva(row.numero)}
+                          variant="outlined"
+                          size="small"
+                          sx={{ backgroundColor: row.activa ? "#4caf50" : "#f44336", color: "white" }}
+                        >
+                          {row.activa ? "Activa" : "Bloqueada"}
+                        </Button>
+                      </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell colSpan={4} sx={{ px: 1, py: 0 }}>
+                      <TableCell colSpan={5} sx={{ px: 1, py: 0 }}>
                         <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
                           <Box marginY={1}>
                             <Typography variant="body2" fontWeight="bold" gutterBottom>
