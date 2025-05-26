@@ -14,11 +14,12 @@ import {
 } from "@mui/material";
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import dayjs from "dayjs";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 
 function ReportesAdmin() {
   const { id: fraccId } = useParams();
+  const navigate = useNavigate();
   const [reportes, setReportes] = useState([]);
   const [casa, setCasa] = useState("");
   const [rango, setRango] = useState("1");
@@ -55,7 +56,7 @@ function ReportesAdmin() {
         Reportes del Fraccionamiento
       </Typography>
 
-      <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
+      <Box display="flex" gap={2} flexWrap="wrap" mb={2} alignItems="center">
         <TextField
           label="Número de Casa"
           value={casa}
@@ -75,6 +76,14 @@ function ReportesAdmin() {
         </FormControl>
         <Button variant="contained" onClick={obtenerReportes}>
           Buscar
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => navigate(`/dashboard/${fraccId}`)}
+          sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 2, sm: 0 } }}
+        >
+          Volver al Dashboard
         </Button>
       </Box>
 
