@@ -15,6 +15,7 @@ import {
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
+import ReportOffIcon from '@mui/icons-material/ReportOff';
 
 function ReportesAdmin() {
   const { id: fraccId } = useParams();
@@ -114,21 +115,14 @@ function ReportesAdmin() {
         </TableRow>
       ))
     ) : (
-      <TableRow>
-        <TableCell colSpan={6} align="center">
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={4}>
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/7486/7486790.png"
-              alt="No reportes"
-              width="80"
-              style={{ opacity: 0.5, marginBottom: 8 }}
-            />
-            <Typography variant="subtitle1" color="textSecondary">
-              No hay reportes disponibles
-            </Typography>
-          </Box>
-        </TableCell>
-      </TableRow>
+      <TableCell colSpan={6} align="center">
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={4}>
+          <ReportOffIcon sx={{ fontSize: 50, color: "text.secondary", mb: 1 }} />
+          <Typography variant="subtitle1" color="textSecondary">
+            No hay reportes disponibles
+          </Typography>
+        </Box>
+      </TableCell>
     )}
   </TableBody>
 </Table>
