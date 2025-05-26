@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -39,7 +37,7 @@ function ReportesAdmin() {
       if (casa) params.casa = casa;
 
       const res = await axios.get(`/api/reportes/${fraccId}/reportes`, { params });
-      setReportes(res.data);
+      setReportes(res.data.reportes);
     } catch (err) {
       console.error("Error al obtener reportes", err);
     }
@@ -91,29 +89,47 @@ function ReportesAdmin() {
     </TableRow>
   </TableHead>
   <TableBody>
-    {reportes.map((r, index) => (
-      <TableRow key={index}>
-        <TableCell>{r.numeroCasa}</TableCell>
-        <TableCell>{r.nombre}</TableCell>
-        <TableCell>{r.motivo}</TableCell>
-        <TableCell>{new Date(r.tiempo).toLocaleString()}</TableCell>
-        <TableCell>{r.estatus}</TableCell>
-        <TableCell>
-          {r.foto ? (
-            <a href={r.foto} target="_blank" rel="noopener noreferrer">
-              <img
-                src={r.foto}
-                alt="foto"
-                width="60"
-                style={{ borderRadius: 4 }}
-              />
-            </a>
-          ) : (
-            "Sin foto"
-          )}
+    {Array.isArray(reportes) && reportes.length > 0 ? (
+      reportes.map((r, index) => (
+        <TableRow key={index}>
+          <TableCell>{r.numeroCasa}</TableCell>
+          <TableCell>{r.nombre}</TableCell>
+          <TableCell>{r.motivo}</TableCell>
+          <TableCell>{new Date(r.tiempo).toLocaleString()}</TableCell>
+          <TableCell>{r.estatus}</TableCell>
+          <TableCell>
+            {r.foto ? (
+              <a href={r.foto} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={r.foto}
+                  alt="foto"
+                  width="60"
+                  style={{ borderRadius: 4 }}
+                />
+              </a>
+            ) : (
+              "Sin foto"
+            )}
+          </TableCell>
+        </TableRow>
+      ))
+    ) : (
+      <TableRow>
+        <TableCell colSpan={6} align="center">
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={4}>
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/7486/7486790.png"
+              alt="No reportes"
+              width="80"
+              style={{ opacity: 0.5, marginBottom: 8 }}
+            />
+            <Typography variant="subtitle1" color="textSecondary">
+              No hay reportes disponibles
+            </Typography>
+          </Box>
         </TableCell>
       </TableRow>
-    ))}
+    )}
   </TableBody>
 </Table>
     </Container>
