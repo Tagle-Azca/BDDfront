@@ -49,6 +49,7 @@ export default function DashboardFracc() {
   const fetchData = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.residencias) return;
       const response = await axios.get(`${API_URL}/api/fracc/${user._id}`);
       const casas = response.data.residencias || [];
 
