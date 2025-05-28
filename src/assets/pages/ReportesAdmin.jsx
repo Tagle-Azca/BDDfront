@@ -39,7 +39,7 @@ function ReportesAdmin() {
       if (casa) params.casa = casa;
 
       const res = await axios.get(`/api/reportes/${fraccId}/reportes`, { params });
-      setReportes(res.data.reportes);
+      setReportes(res.data);
     } catch (err) {
       console.error("Error al obtener reportes", err);
     }
