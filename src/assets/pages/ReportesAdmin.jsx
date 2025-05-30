@@ -17,6 +17,8 @@ import dayjs from "dayjs";
 import { useParams, useNavigate } from "react-router-dom";
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 
+const API_URL = process.env.REACT_APP_API_URL_PROD;
+
 function ReportesAdmin() {
   const { id: fraccId } = useParams();
   const navigate = useNavigate();
@@ -38,7 +40,7 @@ function ReportesAdmin() {
       const params = { desde, hasta };
       if (casa) params.casa = casa;
 
-      const res = await axios.get(`/api/reportes/${fraccId}/reportes`, { params });
+      const res = await axios.get(`${API_URL}/api/reportes/${fraccId}/reportes`, { params });
       setReportes(res.data);
     } catch (err) {
       console.error("Error al obtener reportes", err);
