@@ -25,6 +25,7 @@ import AgregarFraccionamientoModal from "./AgregarFracionamientoModal";
 import EditarFraccionamientoModal from "./ModificarFraccionamientoModal"; 
 import ContactoModal from "./ContactoModal";
 import { QRCodeSVG } from "qrcode.react";
+import { useRef } from "react";
 
 const API_URL = `${process.env.REACT_APP_API_URL_PROD}/api/fracc`;
 export default function TableAdmin() {
@@ -114,6 +115,24 @@ export default function TableAdmin() {
 
   const handleCloseQrModal = () => setOpenQrModal(false);
 
+  const qrRef = useRef(null);
+
+  const handleDownloadQR = () => {
+    const svg = qrRef.current;
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+    const blob = new Blob([svgString], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "qr_fraccionamiento.svg";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
       
@@ -213,8 +232,15 @@ export default function TableAdmin() {
 
       <Dialog open={openQrModal} onClose={handleCloseQrModal}>
         <DialogTitle>QR del Fraccionamiento</DialogTitle>
-        <DialogContent style={{ textAlign: "center" }}>{qrData && <QRCodeSVG value={qrData} size={200} />}</DialogContent>
+        <DialogContent style={{ textAlign: "center" }}>
+          {qrData && (
+            <QRCodeSVG ref={qrRef} value={qrData} size={200} />
+          )}
+        </DialogContent>
         <DialogActions>
+          <Button onClick={handleDownloadQR} color="primary">
+            Descargar QR
+          </Button>
           <Button onClick={handleCloseQrModal} color="primary">
             Cerrar
           </Button>
