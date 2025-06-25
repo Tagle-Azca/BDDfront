@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./assets/pages/Login";
 import FraccDashboard from "./assets/pages/Dashboard";
 import AdminDashboard from "./assets/pages/Admin";
-import Invitados from "./assets/pages/Invitados"
+import Invitados from "./assets/pages/Invitados";
 import ReportesAdmin from "./assets/pages/ReportesAdmin";
-import aviso from "./assets/pages/AvisoPrivacidad";
+import AvisoPrivacidad from "./assets/pages/AvisoPrivacidad";
 
 function App() {
   return (
@@ -16,11 +16,10 @@ function App() {
         <Route path="/reportes/:id" element={<ReportesAdmin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/Visitas" element={<Invitados />} />
-        <Route path="/AvisoProvacidad" element= {<aviso/>}/>
+        <Route path="/AvisoPrivacidad" element={<AvisoPrivacidad />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
