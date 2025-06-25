@@ -16,7 +16,7 @@ function App() {
         <Route path="/reportes/:id" element={<ReportesAdmin />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/Visitas" element={<Invitados />} />
-        <Route path="/AvisoProvacidad" element= {aviso}/>
+        <Route path="/AvisoProvacidad" element= {<aviso/>}/>
       </Routes>
     </Router>
   );
