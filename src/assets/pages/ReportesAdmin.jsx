@@ -10,7 +10,8 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Box
+  Box,
+  Chip
 } from "@mui/material";
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import dayjs from "dayjs";
@@ -108,7 +109,21 @@ function ReportesAdmin() {
           <TableCell>{r.nombre}</TableCell>
           <TableCell>{r.motivo}</TableCell>
           <TableCell>{new Date(r.tiempo).toLocaleString()}</TableCell>
-          <TableCell>{r.estatus}</TableCell>
+          <TableCell>
+            <Chip
+              label={r.estatus}
+              color={
+                r.estatus === "ACEPTADO"
+                  ? "success"
+                  : r.estatus === "RECHAZADO"
+                  ? "error"
+                  : r.estatus === "CANCELADO"
+                  ? "default"
+                  : "warning"
+              }
+              sx={{ fontWeight: "bold" }}
+            />
+          </TableCell>
           <TableCell>
             {r.foto ? (
               <a href={r.foto} target="_blank" rel="noopener noreferrer">

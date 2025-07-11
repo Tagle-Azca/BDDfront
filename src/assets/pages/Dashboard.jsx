@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import AddIcon from "@mui/icons-material/Add";
@@ -21,6 +21,7 @@ import {
   Box,
   IconButton,
   useMediaQuery,
+  Tooltip,
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -42,13 +43,13 @@ export default function DashboardFracc() {
 
   const isMobile = useMediaQuery("(max-width:600px)");
 
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = useMemo(() => JSON.parse(localStorage.getItem("user")), []);
   const userId = user?._id;
+
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       if (!user || !user.residencias) return;
       const response = await axios.get(`${API_URL}/api/fracc/${user._id}`);
       const casas = response.data.residencias || [];
@@ -57,7 +58,7 @@ export default function DashboardFracc() {
         id: index + 1,
         numero: casa.numero,
         propietario: casa.propietario,
-        activa: casa.activa, // nuevo campo
+        activa: casa.activa, 
         residentes: casa.residentes.map((res) => ({
           nombre: res.nombre,
           edad: res.edad,
@@ -93,8 +94,8 @@ export default function DashboardFracc() {
   };
 
   const handleAddResidente = async () => {
+    if (!formData.nombre || !formData.relacion) return;
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       await axios.post(
         `${API_URL}/api/fracc/${user._id}/casas/${selectedCasa.numero}/residentes`,
         formData
@@ -108,8 +109,8 @@ export default function DashboardFracc() {
   };
 
   const handleAddCasa = async () => {
+    if (!newCasa.numero || !newCasa.propietario) return;
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       await axios.post(`${API_URL}/api/fracc/${user._id}/casas`, newCasa);
       setNewCasa({ numero: "", propietario: ""});
       setOpenAddCasa(false);
@@ -122,7 +123,6 @@ export default function DashboardFracc() {
   // Nueva función para activar/desactivar casa
   const toggleCasaActiva = async (numero) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
       await axios.put(`${API_URL}/api/fracc/${user._id}/casas/${numero}/toggle`);
       fetchData();
     } catch (error) {
@@ -184,9 +184,27 @@ export default function DashboardFracc() {
                 <TableRow>
                   <TableCell />
                   <TableCell>Residencia</TableCell>
-                  <TableCell>QR</TableCell>
-                  <TableCell>Agregar</TableCell>
-                  <TableCell>Activa</TableCell>
+                  <TableCell>
+                    <Tooltip title="Visualizar código QR del visitante">
+                      <Typography fontWeight="bold">
+                        QR
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title="Agregar nuevo residente a la casa">
+                      <Typography fontWeight="bold">
+                        Agregar
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title="Activar o bloquear el acceso a la casa">
+                      <Typography fontWeight="bold">
+                        Estado
+                      </Typography>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -200,33 +218,39 @@ export default function DashboardFracc() {
                       </TableCell>
                       <TableCell>{row.numero}</TableCell>
                       <TableCell>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            const fraccId = JSON.parse(localStorage.getItem("user"))._id;
-                            setQrValue(
-                              `https://registro.eskayser.app?id=${fraccId}&casa=${row.numero}`
-                            );
-                            setOpenQR(true);
-                          }}
-                        >
-                          <RemoveRedEyeIcon fontSize="small" />
-                        </IconButton>
+                        <Tooltip title="Ver QR de registro">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              const fraccId = user._id;
+                              setQrValue(
+                                `https://registro.eskayser.app?id=${fraccId}&casa=${row.numero}`
+                              );
+                              setOpenQR(true);
+                            }}
+                          >
+                            <RemoveRedEyeIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
-                        <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small" style={{backgroundColor:"#0ba969", color:"white"}}>
-                          Agregar
-                        </Button>
+                        <Tooltip title="Agregar residente">
+                          <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small" style={{backgroundColor:"#0ba969", color:"white"}}>
+                            Agregar
+                          </Button>
+                        </Tooltip>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          onClick={() => toggleCasaActiva(row.numero)}
-                          variant="outlined"
-                          size="small"
-                          sx={{ backgroundColor: row.activa ? "#4caf50" : "#f44336", color: "white" }}
-                        >
-                          {row.activa ? "Activa" : "Bloqueada"}
-                        </Button>
+                        <Tooltip title={row.activa ? "Desactivar casa" : "Activar casa"}>
+                          <Button
+                            onClick={() => toggleCasaActiva(row.numero)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ backgroundColor: row.activa ? "#4caf50" : "#f44336", color: "white" }}
+                          >
+                            {row.activa ? "Activa" : "Bloqueada"}
+                          </Button>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -240,14 +264,26 @@ export default function DashboardFracc() {
                               <TableHead>
                                 <TableRow>
                                   <TableCell>Nombre</TableCell>
+                                  <TableCell>Relación</TableCell>
+                                  <TableCell>Edad</TableCell>
                                 </TableRow>
                               </TableHead>
                               <TableBody>
-                                {row.residentes.map((res, idx) => (
-                                  <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
-                                    <TableCell>{res.nombre}</TableCell>
+                                {row.residentes.length > 0 ? (
+                                  row.residentes.map((res, idx) => (
+                                    <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
+                                      <TableCell>{res.nombre}</TableCell>
+                                      <TableCell>{res.relacion || "-"}</TableCell>
+                                      <TableCell>{res.edad || "-"}</TableCell>
+                                    </TableRow>
+                                  ))
+                                ) : (
+                                  <TableRow>
+                                    <TableCell sx={{ fontStyle: "italic", color: "#616161" }} colSpan={3}>
+                                      Sin residentes registrados
+                                    </TableCell>
                                   </TableRow>
-                                ))}
+                                )}
                               </TableBody>
                             </Table>
                           </Box>
@@ -260,7 +296,7 @@ export default function DashboardFracc() {
             </Table>
           </TableContainer>
 
-          <Dialog open={openQR} onClose={() => setOpenQR(false)}>
+          <Dialog open={openQR} onClose={() => setOpenQR(false)} fullScreen={isMobile}>
             <DialogTitle sx={{ fontSize: 16 }}>QR de Registro</DialogTitle>
             <DialogContent sx={{ textAlign: "center" }}>
               <Box sx={{ p: 2, bgcolor: "#fff", borderRadius: 2, boxShadow: 2 }}>
@@ -283,7 +319,7 @@ export default function DashboardFracc() {
             </DialogActions>
           </Dialog>
 
-          <Dialog open={openForm} onClose={() => setOpenForm(false)}>
+          <Dialog open={openForm} onClose={() => setOpenForm(false)} fullScreen={isMobile}>
             <DialogTitle sx={{ fontSize: 16 }}>Agregar Residente</DialogTitle>
             <DialogContent>
               <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
@@ -295,10 +331,14 @@ export default function DashboardFracc() {
             </DialogActions>
           </Dialog>
 
-          <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)}>
+          <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)} fullScreen={isMobile}>
             <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+              Una casa representa una residencia dentro del fraccionamiento. Solo las casas activas podrán recibir visitas.
+            </Typography>
             <DialogContent>
               <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
+              <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>

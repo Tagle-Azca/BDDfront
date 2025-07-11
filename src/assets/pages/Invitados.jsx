@@ -50,20 +50,24 @@ function Invitados() {
   }, []);
 
   const handleFotoChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-    if (!validTypes.includes(file.type)) {
-      setFotoError(true);
-      setErrorGeneral("Solo se permiten imágenes JPG o PNG");
-      return;
+    const file = e.target.files[0];
+    if (file) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!validTypes.includes(file.type)) {
+        setFotoError(true);
+        setErrorGeneral("Solo se permiten imágenes JPG o PNG");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        setFotoError(true);
+        setErrorGeneral("La foto no debe superar los 2MB");
+        return;
+      }
+      setFotoVisita(file);
+      setFotoError(false);
+      setErrorGeneral("");
     }
-
-    setFotoVisita(file);
-    setFotoError(false);
-    setErrorGeneral("");
-  }
-};
+  };
 
   const handleSubmit = async () => {
     setErrorGeneral("");
@@ -90,6 +94,7 @@ function Invitados() {
     formData.append("motivo", motivo);
     formData.append("residencia", residencia);
     formData.append("FotoVisita", FotoVisita);
+    formData.append("origen", "web");
 
     try {
       setLoading(true);
@@ -183,13 +188,12 @@ function Invitados() {
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem disabled sx={{ color: "gray" }}>
+                <MenuItem disabled sx={{ color: "#4a4a4a" }}>
                   No hay residencias registradas
                 </MenuItem>
               )}
             </Select>
           </FormControl>
-
           <Button
             component="label"
             variant="outlined"
