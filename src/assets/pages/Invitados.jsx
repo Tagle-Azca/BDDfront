@@ -34,7 +34,7 @@ function Invitados() {
 
     if (!fraccId) return;
 
-    fetch(`${API_URL}/api/fracc/${fraccId}`)
+    fetch(`${API_URL}/api/fraccionamientos/${fraccId}`)
       .then((res) => res.json())
       .then((data) => {
   if (data.residencias) {
@@ -98,7 +98,7 @@ function Invitados() {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/fracc/${fraccId}/casas/${residencia}/visitas`, {
+      const response = await fetch(`${API_URL}/api/fraccionamientos/${fraccId}/casas/${residencia}/visitas`, {
         method: "POST",
         body: formData,
       });

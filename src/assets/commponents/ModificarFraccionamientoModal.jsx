@@ -42,7 +42,7 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       return;
     }
   
-   const requestUrl = `${API_URL}/api/fracc/update/${fraccionamiento._id}`;
+   const requestUrl = `${API_URL}/api/fraccionamientos/update/${fraccionamiento._id}`;
   
 
     const updateData = Object.fromEntries(

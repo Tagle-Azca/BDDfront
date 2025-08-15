@@ -51,7 +51,7 @@ export default function DashboardFracc() {
   const fetchData = async () => {
     try {
       if (!user || !user.residencias) return;
-      const response = await axios.get(`${API_URL}/api/fracc/${user._id}`);
+      const response = await axios.get(`${API_URL}/api/fraccionamientos/${user._id}`);
       const casas = response.data.residencias || [];
 
       const dataFormatted = casas.map((casa, index) => ({
@@ -97,7 +97,7 @@ export default function DashboardFracc() {
     if (!formData.nombre || !formData.relacion) return;
     try {
       await axios.post(
-        `${API_URL}/api/fracc/${user._id}/casas/${selectedCasa.numero}/residentes`,
+        `${API_URL}/api/fraccionamientos/${user._id}/casas/${selectedCasa.numero}/residentes`,
         formData
       );
       setOpenForm(false);
@@ -111,7 +111,7 @@ export default function DashboardFracc() {
   const handleAddCasa = async () => {
     if (!newCasa.numero || !newCasa.propietario) return;
     try {
-      await axios.post(`${API_URL}/api/fracc/${user._id}/casas`, newCasa);
+      await axios.post(`${API_URL}/api/fraccionamientos/${user._id}/casas`, newCasa);
       setNewCasa({ numero: "", propietario: ""});
       setOpenAddCasa(false);
       fetchData();
@@ -123,7 +123,7 @@ export default function DashboardFracc() {
   // Nueva función para activar/desactivar casa
   const toggleCasaActiva = async (numero) => {
     try {
-      await axios.put(`${API_URL}/api/fracc/${user._id}/casas/${numero}/toggle`);
+      await axios.put(`${API_URL}/api/fraccionamientos/${user._id}/casas/${numero}/toggle`);
       fetchData();
     } catch (error) {
       console.error("❌ Error al cambiar estado de la casa:", error);

@@ -27,7 +27,7 @@ import ContactoModal from "./ContactoModal";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
 
-const API_URL = `${process.env.REACT_APP_API_URL_PROD}/api/fracc`;
+const API_URL = `${process.env.REACT_APP_API_URL_PROD}/api/fraccionamientos`;
 export default function TableAdmin() {
   const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);

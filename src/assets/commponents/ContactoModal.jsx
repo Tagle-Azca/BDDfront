@@ -34,7 +34,7 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:5002/api/fracc/add", {
+      const response = await fetch("http://localhost:5002/api/fraccionamientos/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
