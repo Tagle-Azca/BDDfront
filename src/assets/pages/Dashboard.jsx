@@ -61,7 +61,6 @@ export default function DashboardFracc() {
         activa: casa.activa, 
         residentes: casa.residentes.map((res) => ({
           nombre: res.nombre,
-          edad: res.edad,
           relacion: res.relacion,
         })),
       }));
@@ -101,7 +100,7 @@ export default function DashboardFracc() {
         formData
       );
       setOpenForm(false);
-      setFormData({ nombre: "", edad: "", relacion: "" });
+      setFormData({ nombre: "", relacion: "" });
       fetchData();
     } catch (error) {
       console.error("❌ Error al agregar residente:", error);
@@ -265,7 +264,6 @@ export default function DashboardFracc() {
                                 <TableRow>
                                   <TableCell>Nombre</TableCell>
                                   <TableCell>Relación</TableCell>
-                                  <TableCell>Edad</TableCell>
                                 </TableRow>
                               </TableHead>
                               <TableBody>
@@ -274,7 +272,6 @@ export default function DashboardFracc() {
                                     <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
                                       <TableCell>{res.nombre}</TableCell>
                                       <TableCell>{res.relacion || "-"}</TableCell>
-                                      <TableCell>{res.edad || "-"}</TableCell>
                                     </TableRow>
                                   ))
                                 ) : (

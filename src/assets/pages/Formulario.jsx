@@ -6,7 +6,6 @@ const Formulario = () => {
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
-    edad: "",
   });
 
   const handleChange = (e) => {
@@ -16,7 +15,7 @@ const Formulario = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert(
-      `Datos enviados: \nNombre: ${formData.nombre}\nEmail: ${formData.email}\nEdad: ${formData.edad}`
+      `Datos enviados: \nNombre: ${formData.nombre}\nEmail: ${formData.email}`
     );
   };
 
@@ -35,12 +34,6 @@ const Formulario = () => {
           value={formData.email}
           onChange={handleChange}
           type="email"
-        />
-        <InputField
-          label="Edad:"
-          value={formData.edad}
-          onChange={handleChange}
-          type="number"
         />
         <SubmitButton text="Enviar" />
       </form>
