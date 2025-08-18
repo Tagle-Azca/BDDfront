@@ -223,7 +223,7 @@ export default function DashboardFracc() {
                             onClick={() => {
                               const fraccId = user._id;
                               setQrValue(
-                                `https://registro.eskayser.app?id=${fraccId}&casa=${row.numero}`
+                                `https://admin-one-livid.vercel.app'?id=${fraccId}&casa=${row.numero}`
                               );
                               setOpenQR(true);
                             }}
