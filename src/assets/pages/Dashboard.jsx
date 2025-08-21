@@ -330,12 +330,9 @@ export default function DashboardFracc() {
 
           <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)} fullScreen={isMobile}>
             <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
-            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-              Una casa representa una residencia dentro del fraccionamiento. Solo las casas activas podrán recibir visitas.
-            </Typography>
+           
             <DialogContent>
               <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
-              <TextField size="small" label="Propietario" name="propietario" onChange={handleCasaChange} fullWidth />
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>

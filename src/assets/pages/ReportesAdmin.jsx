@@ -41,7 +41,7 @@ function ReportesAdmin() {
       const params = { desde, hasta };
       if (casa) params.casa = casa;
 
-      const res = await axios.get(`${API_URL}/api/reportes/${fraccId}/reportes`, { params });
+      const res = await axios.get(`${API_URL}/api/notifications/historial/${fraccId}/${casa || 'all'}`, { params });
       setReportes(res.data);
     } catch (err) {
       console.error("Error al obtener reportes", err);
