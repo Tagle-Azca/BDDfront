@@ -57,11 +57,6 @@ function Invitados() {
         setErrorGeneral("Solo se permiten imágenes JPG o PNG");
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        setFotoError(true);
-        setErrorGeneral("La foto no debe superar los 2MB");
-        return;
-      }
       setFotoVisita(file);
       setFotoError(false);
       setErrorGeneral("");
