@@ -38,7 +38,7 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
 
   const handleUpdate = async () => {
     if (!fraccionamiento?._id) {
-      console.error("❌ No se puede actualizar: ID no válido");
+      console.error("No se puede actualizar: ID no válido");
       return;
     }
   
@@ -54,7 +54,7 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
   
     try {
       const response = await axios.put(requestUrl, updateData);
-      console.log("✅ Fraccionamiento actualizado:", response.data);
+      console.log("Fraccionamiento actualizado:", response.data);
       fetchData();
       handleClose();
     } catch (error) {

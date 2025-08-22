@@ -27,7 +27,6 @@ function Invitados() {
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const fraccId = urlParams.get("id");
@@ -37,13 +36,13 @@ function Invitados() {
     fetch(`${API_URL}/api/fraccionamientos/${fraccId}`)
       .then((res) => res.json())
       .then((data) => {
-  if (data.residencias) {
-    const lista = data.residencias
-      .filter((c) => c.activa === true)
-      .map((c) => c.numero);
-    setResidencias(lista);
-  }
-})
+        if (data.residencias) {
+          const lista = data.residencias
+            .filter((c) => c.activa === true)
+            .map((c) => c.numero);
+          setResidencias(lista);
+        }
+      })
       .catch((err) => {
         console.error("Error al cargar residencias:", err);
       });
@@ -69,9 +68,44 @@ function Invitados() {
     }
   };
 
+  const enviarNotificacion = async (fraccId, residencia, nombre, motivo, fotoUrl) => {
+    try {
+      console.log("📤 Enviando notificación...", { fraccId, residencia, nombre });
+      
+      const response = await fetch(`${API_URL}/api/notifications/send-notification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: nombre,
+          body: motivo,
+          fraccId: fraccId,
+          residencia: residencia,
+          foto: fotoUrl
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log("✅ Notificación enviada:", data.mensaje);
+        return { success: true, notificationId: data.notificationId };
+      } else {
+        console.error("❌ Error enviando notificación:", data.error);
+        return { success: false, error: data.error };
+      }
+      
+    } catch (error) {
+      console.error("❌ Error en enviarNotificacion:", error);
+      return { success: false, error: "Error de conexión al enviar notificación" };
+    }
+  };
+
   const handleSubmit = async () => {
     setErrorGeneral("");
     setExito("");
+    
     if (!nombre || !motivo || !residencia) {
       setErrorGeneral("Por favor, completa todos los campos.");
       return;
@@ -98,30 +132,53 @@ function Invitados() {
 
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/fraccionamientos/${fraccId}/casas/${residencia}/visitas`, {
+      
+      console.log("Registrando visita...");
+      const responseVisita = await fetch(`${API_URL}/api/fraccionamientos/${fraccId}/casas/${residencia}/visitas`, {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
+      const dataVisita = await responseVisita.json();
 
-      if (!response.ok) {
-        setErrorGeneral(data.error || "Error desconocido");
+      if (!responseVisita.ok) {
+        setErrorGeneral(dataVisita.error || "Error al registrar visita");
         setLoading(false);
         return;
       }
 
-      setExito(data.mensaje || "Visita registrada con éxito");
+      console.log("✅ Visita registrada:", dataVisita.mensaje);
 
-      setNombre("");
-      setMotivo("");
-      setResidencia("");
-      setFotoVisita(null);
-      setErrorGeneral("");
-      setFotoError(false);
-      setLoading(false);
+      const resultadoNotificacion = await enviarNotificacion(
+        fraccId,
+        residencia,
+        nombre,
+        motivo,
+        dataVisita.foto
+      );
+
+      if (resultadoNotificacion.success) {
+        setExito(`${dataVisita.mensaje}. Notificación enviada a los residentes.`);
+        
+        setNombre("");
+        setMotivo("");
+        setResidencia("");
+        setFotoVisita(null);
+        setErrorGeneral("");
+        setFotoError(false);
+        
+        console.log("Proceso completado exitosamente");
+      } else {
+        setExito(dataVisita.mensaje);
+        setErrorGeneral(`Advertencia: ${resultadoNotificacion.error || "No se pudo notificar a los residentes"}`);
+        
+        console.log("Visita registrada pero notificación falló");
+      }
+
     } catch (err) {
-      setErrorGeneral("Error al mandar la solicitud");
+      console.error("Error en handleSubmit:", err);
+      setErrorGeneral("Error de conexión. Intenta nuevamente.");
+    } finally {
       setLoading(false);
     }
   };
@@ -152,6 +209,7 @@ function Invitados() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             fullWidth
+            disabled={loading}
             sx={{
               borderRadius: 3,
               "& .MuiInputBase-input": { color: "black" },
@@ -163,6 +221,7 @@ function Invitados() {
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             fullWidth
+            disabled={loading}
             sx={{
               borderRadius: 3,
               "& .MuiInputBase-input": { color: "black" },
@@ -170,7 +229,7 @@ function Invitados() {
             }}
           />
 
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={loading}>
             <InputLabel sx={{ color: "black" }}>Residencia</InputLabel>
             <Select
               value={residencia}
@@ -184,7 +243,7 @@ function Invitados() {
               {residencias.length > 0 ? (
                 residencias.map((r) => (
                   <MenuItem key={r} value={r} sx={{ color: "black" }}>
-                    {r}
+                    Casa {r}
                   </MenuItem>
                 ))
               ) : (
@@ -194,9 +253,11 @@ function Invitados() {
               )}
             </Select>
           </FormControl>
+
           <Button
             component="label"
             variant="outlined"
+            disabled={loading}
             sx={{
               borderRadius: "30px",
               height: "3.5rem",
@@ -212,7 +273,7 @@ function Invitados() {
               },
             }}
           >
-            {FotoVisita ? "Foto cargada" : "Tomar selfie"}
+            {FotoVisita ? "✅ Foto cargada" : "📷 Tomar selfie"}
             <input
               type="file"
               accept="image/*"
@@ -223,7 +284,7 @@ function Invitados() {
           </Button>
 
           {fotoError && (
-            <Typography color="red" textAlign="center" fontWeight="bold">
+            <Typography color="error" textAlign="center" fontWeight="bold">
               Agrega una selfie como identificación
             </Typography>
           )}
@@ -231,11 +292,11 @@ function Invitados() {
           <Box textAlign="center">
             <Button
               variant="contained"
-              disabled={loading}
+              disabled={loading || fotoError}
               sx={{
-                backgroundColor: fotoError ? "red" : "success.main",
+                backgroundColor: fotoError ? "error.main" : "success.main",
                 "&:hover": {
-                  backgroundColor: fotoError ? "#cc0000" : "success.dark",
+                  backgroundColor: fotoError ? "error.dark" : "success.dark",
                 },
                 borderRadius: "30px",
                 height: "3.5rem",
@@ -246,9 +307,15 @@ function Invitados() {
               }}
               onClick={handleSubmit}
             >
-              {loading ? "Enviando..." : "Registrar Visita"}
+              {loading ? "⏳ Procesando..." : "🚀 Registrar Visita"}
             </Button>
           </Box>
+
+          {loading && (
+            <Typography variant="body2" textAlign="center" color="text.secondary">
+              Registrando visita y enviando notificación...
+            </Typography>
+          )}
         </CardContent>
       </Card>
     </Container>
