@@ -67,7 +67,7 @@ export default function DashboardFracc() {
 
       setData(dataFormatted);
     } catch (error) {
-      console.error("Error al obtener datos del fraccionamiento:", error);
+      console.error("❌ Error al obtener datos del fraccionamiento:", error);
     }
   };
 
@@ -103,7 +103,7 @@ export default function DashboardFracc() {
       setFormData({ nombre: "", relacion: "" });
       fetchData();
     } catch (error) {
-      console.error("Error al agregar residente:", error);
+      console.error("❌ Error al agregar residente:", error);
     }
   };
 
@@ -115,16 +115,17 @@ export default function DashboardFracc() {
       setOpenAddCasa(false);
       fetchData();
     } catch (error) {
-      console.error("Error al agregar casa:", error);
+      console.error("❌ Error al agregar casa:", error);
     }
   };
 
+  // Nueva función para activar/desactivar casa
   const toggleCasaActiva = async (numero) => {
     try {
       await axios.put(`${API_URL}/api/fraccionamientos/${user._id}/casas/${numero}/toggle`);
       fetchData();
     } catch (error) {
-      console.error("Error al cambiar estado de la casa:", error);
+      console.error("❌ Error al cambiar estado de la casa:", error);
     }
   };
 
