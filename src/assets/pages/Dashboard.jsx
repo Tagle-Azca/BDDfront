@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import AddIcon from "@mui/icons-material/Add";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import QrCodeIcon from "@mui/icons-material/QrCode";
 import {
   Dialog,
   DialogTitle,
@@ -10,29 +11,38 @@ import {
   Button,
   TextField,
   Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Collapse,
   Box,
-  IconButton,
   useMediaQuery,
-  Tooltip,
+  Container,
+  Chip,
+  Grid,
+  ToggleButton,
+  ToggleButtonGroup,
+  Fade,
+  CircularProgress,
 } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import {
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+} from "@mui/icons-material";
 import axios from "axios";
 import Navbar from "../commponents/Navbar";
+import AdminHeader from "../commponents/shared/AdminHeader";
+import SearchAndActions from "../commponents/shared/SearchAndActions";
+import HouseCard from "../commponents/shared/HouseCard";
+import DashboardStats from "../commponents/shared/DashboardStats";
+import EmptyState from "../commponents/shared/EmptyState";
+import LoadingState from "../commponents/shared/LoadingState";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
 
 export default function DashboardFracc() {
   const [data, setData] = useState([]);
-  const [openRow, setOpenRow] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [viewMode, setViewMode] = useState("grid");
+  const [loading, setLoading] = useState(true);
   const [openQR, setOpenQR] = useState(false);
   const [qrValue, setQrValue] = useState("");
   const [openForm, setOpenForm] = useState(false);
@@ -50,7 +60,11 @@ export default function DashboardFracc() {
 
   const fetchData = async () => {
     try {
-      if (!user || !user.residencias) return;
+      setLoading(true);
+      if (!user || !user.residencias) {
+        setLoading(false);
+        return;
+      }
       const response = await axios.get(`${API_URL}/api/fraccionamientos/${user._id}`);
       const casas = response.data.residencias || [];
 
@@ -66,8 +80,11 @@ export default function DashboardFracc() {
       }));
 
       setData(dataFormatted);
+      setFilteredData(dataFormatted);
     } catch (error) {
       console.error("❌ Error al obtener datos del fraccionamiento:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,7 +92,6 @@ export default function DashboardFracc() {
     fetchData();
   }, []);
 
-  const toggleRow = (id) => setOpenRow(openRow === id ? null : id);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -119,228 +135,528 @@ export default function DashboardFracc() {
     }
   };
 
-  // Nueva función para activar/desactivar casa
   const toggleCasaActiva = async (numero) => {
     try {
       await axios.put(`${API_URL}/api/fraccionamientos/${user._id}/casas/${numero}/toggle`);
       fetchData();
     } catch (error) {
-      console.error("❌ Error al cambiar estado de la casa:", error);
+      console.error("Error al cambiar estado de la casa:", error);
     }
   };
 
+  useEffect(() => {
+    let filtered = data;
+    
+    if (searchValue) {
+      filtered = filtered.filter((casa) => 
+        casa.numero.toString().includes(searchValue) ||
+        casa.propietario?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        casa.residentes.some(res => 
+          res.nombre.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      );
+    }
+    
+    if (statusFilter) {
+      filtered = filtered.filter((casa) => {
+        if (statusFilter === "activa") return casa.activa;
+        if (statusFilter === "bloqueada") return !casa.activa;
+        return true;
+      });
+    }
+    
+    setFilteredData(filtered);
+  }, [data, searchValue, statusFilter]);
+
+
+  const searchActions = [
+    {
+      label: "Agregar Casa",
+      onClick: () => setOpenAddCasa(true),
+      color: "success",
+      variant: "contained",
+      icon: AddIcon,
+    },
+    {
+      label: "Ver Reportes",
+      onClick: () => navigate(`/reportes/${userId}`),
+      color: "primary",
+      variant: "outlined",
+    },
+  ];
+
+  const handleViewModeChange = (event, newViewMode) => {
+    if (newViewMode !== null) {
+      setViewMode(newViewMode);
+    }
+  };
+
+  const handleShowQR = (house) => {
+    const fraccId = user._id;
+    setQrValue(`${fraccId}&casa=${house.numero}`);
+    setOpenQR(true);
+  };
+
+  const handleAddResident = (house) => {
+    setSelectedCasa(house);
+    setOpenForm(true);
+  };
+
+  const filters = [
+    {
+      key: "estado",
+      label: "Estado",
+      value: statusFilter,
+      options: [
+        { value: "activa", label: "Activas" },
+        { value: "bloqueada", label: "Bloqueadas" },
+      ],
+    },
+  ];
+
+  const activeFilters = [];
+  if (statusFilter) {
+    activeFilters.push({
+      key: "estado",
+      label: "Estado",
+      value: statusFilter === "activa" ? "Activas" : "Bloqueadas",
+      color: statusFilter === "activa" ? "success" : "error",
+    });
+  }
+
+  const handleFilterChange = (key, value) => {
+    if (key === "estado") {
+      setStatusFilter(value);
+    }
+  };
+
+  const handleRemoveFilter = (key) => {
+    if (key === "estado") {
+      setStatusFilter("");
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchValue("");
+    setStatusFilter("");
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+        <Navbar />
+        <Container maxWidth="xl" sx={{ py: 3, pt: 2 }}>
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Dashboard del Fraccionamiento
+            </Typography>
+            <Typography variant="body1" color="textSecondary">
+              Gestión de casas y residentes - {user?.fraccionamiento || 'Fraccionamiento'}
+            </Typography>
+          </Box>
+          <LoadingState type="stats" />
+          <LoadingState type="cards" count={8} />
+        </Container>
+      </Box>
+    );
+  }
+
   return (
-    <>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       <Navbar />
-      <Box sx={{ width: "100%", display: "flex", justifyContent: "center", mt: 3 }}>
-        <Paper
-          elevation={3}
-          sx={{
-            maxWidth: "1200px",
-            width: "100%",
-            mx: "auto",
-            p: isMobile ? 1.5 : 3,
-            borderRadius: 3,
-            boxShadow: 3,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              mb: 2,
+      <Container maxWidth="xl" sx={{ py: 3, pt: 2 }}>
+        <AdminHeader
+          title="Dashboard del Fraccionamiento"
+          subtitle={`Gestión de casas y residentes - ${user?.fraccionamiento || 'Fraccionamiento'}`}
+        />
+
+        <DashboardStats data={data} />
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', md: 'center' },
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 2,
+          mb: 3 
+        }}>
+          <Box sx={{ flexGrow: 1, width: { xs: '100%', md: 'auto' } }}>
+            <SearchAndActions
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              placeholder="Buscar casa, propietario o residente..."
+              actions={searchActions}
+              filters={filters}
+              activeFilters={activeFilters}
+              onFilterChange={handleFilterChange}
+              onRemoveFilter={handleRemoveFilter}
+            />
+          </Box>
+          
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={handleViewModeChange}
+            size="small"
+            sx={{ 
+              alignSelf: { xs: 'flex-end', md: 'center' },
+              bgcolor: 'background.paper',
+              borderRadius: 2,
+              '& .MuiToggleButton-root': {
+                border: 'none',
+                borderRadius: '8px !important',
+                mx: 0.5,
+                '&.Mui-selected': {
+                  bgcolor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: 'primary.dark',
+                  }
+                }
+              }
             }}
           >
-            <Typography variant={isMobile ? "h6" : "h5"} fontWeight="600" color="black">
-              Casas del Fraccionamiento
-            </Typography>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Button
-                onClick={() => setOpenAddCasa(true)}
-                variant="contained"
-                size={isMobile ? "small" : "medium"}
-                startIcon={<AddIcon />}
-                sx={{ bgcolor: "#0ba969", ":hover": { bgcolor: "#0a8d5d" } }}
-              >
-                Agregar Casa
-              </Button>
-              <Button
-                onClick={() => navigate(`/reportes/${userId}`)}
-                variant="outlined"
-                size={isMobile ? "small" : "medium"}
-                sx={{ ml: 2 }}
-              >
-                Ver Reportes
-              </Button>
-            </Box>
-          </Box>
+            <ToggleButton value="grid" sx={{ px: 2 }}>
+              <GridViewIcon fontSize="small" />
+            </ToggleButton>
+            <ToggleButton value="list" sx={{ px: 2 }}>
+              <ListViewIcon fontSize="small" />
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
-          <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell />
-                  <TableCell>Residencia</TableCell>
-                  <TableCell>
-                    <Tooltip title="Visualizar código QR del visitante">
-                      <Typography fontWeight="bold">
-                        QR
-                      </Typography>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title="Agregar nuevo residente a la casa">
-                      <Typography fontWeight="bold">
-                        Agregar
-                      </Typography>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip title="Activar o bloquear el acceso a la casa">
-                      <Typography fontWeight="bold">
-                        Estado
-                      </Typography>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data.map((row) => (
-                  <>
-                    <TableRow key={row.id}>
-                      <TableCell>
-                        <IconButton size="small" onClick={() => toggleRow(row.id)}>
-                          {openRow === row.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                        </IconButton>
-                      </TableCell>
-                      <TableCell>{row.numero}</TableCell>
-                      <TableCell>
-                        <Tooltip title="Ver QR de registro">
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                              const fraccId = user._id;
-                              setQrValue(
-                                `https://admin-one-livid.vercel.app'?id=${fraccId}&casa=${row.numero}`
-                              );
-                              setOpenQR(true);
-                            }}
-                          >
-                            <RemoveRedEyeIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="Agregar residente">
-                          <Button variant="outlined" onClick={() => handleOpenForm(row)} size="small" style={{backgroundColor:"#0ba969", color:"white"}}>
-                            Agregar
-                          </Button>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title={row.activa ? "Desactivar casa" : "Activar casa"}>
-                          <Button
-                            onClick={() => toggleCasaActiva(row.numero)}
-                            variant="outlined"
-                            size="small"
-                            sx={{ backgroundColor: row.activa ? "#4caf50" : "#f44336", color: "white" }}
-                          >
-                            {row.activa ? "Activa" : "Bloqueada"}
-                          </Button>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell colSpan={5} sx={{ px: 1, py: 0 }}>
-                        <Collapse in={openRow === row.id} timeout="auto" unmountOnExit>
-                          <Box marginY={1}>
-                            <Typography variant="body2" fontWeight="bold" gutterBottom>
-                              Residentes
-                            </Typography>
-                            <Table size="small">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>Nombre</TableCell>
-                                  <TableCell>Relación</TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {row.residentes.length > 0 ? (
-                                  row.residentes.map((res, idx) => (
-                                    <TableRow key={idx} sx={{ backgroundColor: "#f9f9f9" }}>
-                                      <TableCell>{res.nombre}</TableCell>
-                                      <TableCell>{res.relacion || "-"}</TableCell>
-                                    </TableRow>
-                                  ))
-                                ) : (
-                                  <TableRow>
-                                    <TableCell sx={{ fontStyle: "italic", color: "#616161" }} colSpan={3}>
-                                      Sin residentes registrados
-                                    </TableCell>
-                                  </TableRow>
-                                )}
-                              </TableBody>
-                            </Table>
-                          </Box>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </>
+        <Fade in={!loading}>
+          <Box>
+            {filteredData.length === 0 ? (
+              <EmptyState
+                type={searchValue || statusFilter ? "no-results" : "no-data"}
+                onAction={searchValue || statusFilter ? clearFilters : () => setOpenAddCasa(true)}
+                actionLabel={searchValue || statusFilter ? "Limpiar Filtros" : "Agregar Primera Casa"}
+              />
+            ) : (
+              <Grid container spacing={3}>
+                {filteredData.map((house) => (
+                  <Grid 
+                    item 
+                    xs={12} 
+                    sm={viewMode === "grid" ? 6 : 12} 
+                    md={viewMode === "grid" ? 4 : 12} 
+                    lg={viewMode === "grid" ? 3 : 12}
+                    key={house.id}
+                  >
+                    <HouseCard
+                      house={house}
+                      onAddResident={handleAddResident}
+                      onToggleActive={toggleCasaActiva}
+                      onShowQR={handleShowQR}
+                      sx={{
+                        height: viewMode === "list" ? "auto" : "100%",
+                      }}
+                    />
+                  </Grid>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              </Grid>
+            )}
+          </Box>
+        </Fade>
 
-          <Dialog open={openQR} onClose={() => setOpenQR(false)} fullScreen={isMobile}>
-            <DialogTitle sx={{ fontSize: 16 }}>QR de Registro</DialogTitle>
-            <DialogContent sx={{ textAlign: "center" }}>
-              <Box sx={{ p: 2, bgcolor: "#fff", borderRadius: 2, boxShadow: 2 }}>
+          <Dialog 
+            open={openQR} 
+            onClose={() => setOpenQR(false)} 
+            fullScreen={isMobile}
+            maxWidth="sm"
+            PaperProps={{
+              sx: {
+                borderRadius: isMobile ? 0 : 3,
+                overflow: 'hidden'
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              fontSize: 20, 
+              fontWeight: 600,
+              background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2
+            }}>
+              <QrCodeIcon />
+              Código QR de Registro
+            </DialogTitle>
+            <DialogContent sx={{ textAlign: "center", py: 4 }}>
+              <Box sx={{ 
+                p: 3, 
+                bgcolor: "#ffffff", 
+                borderRadius: 3, 
+                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                border: '2px solid #f0f0f0',
+                mx: 'auto',
+                maxWidth: 280
+              }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#0ba969', mb: 2 }}>
+                  Código para Visitas
+                </Typography>
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
                     qrValue
                   )}`}
-                  alt="QR"
-                  style={{ display: "block", margin: "0 auto" }}
+                  alt="QR Code"
+                  style={{ 
+                    display: "block", 
+                    margin: "0 auto",
+                    border: "4px solid #f8f9fa",
+                    borderRadius: "8px"
+                  }}
                 />
-                <Typography variant="caption" sx={{ mt: 2, wordBreak: "break-all" }}>
-                  {qrValue}
-                </Typography>
               </Box>
+              <Typography variant="body2" color="textSecondary" sx={{ mt: 2, maxWidth: 400, mx: 'auto' }}>
+                Los visitantes pueden usar este código QR para registrarse en la aplicación móvil
+              </Typography>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenQR(false)} variant="contained" size="small">
+            <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
+              <Button 
+                onClick={() => setOpenQR(false)} 
+                variant="contained" 
+                size="medium"
+                sx={{ 
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1,
+                  background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)'
+                }}
+              >
                 Cerrar
               </Button>
             </DialogActions>
           </Dialog>
 
-          <Dialog open={openForm} onClose={() => setOpenForm(false)} fullScreen={isMobile}>
-            <DialogTitle sx={{ fontSize: 16 }}>Agregar Residente</DialogTitle>
-            <DialogContent>
-              <TextField size="small" label="Nombre" name="nombre" onChange={handleInputChange} fullWidth />
-              <TextField size="small" label="Relación" name="relacion" onChange={handleInputChange} fullWidth />
+          <Dialog 
+            open={openForm} 
+            onClose={() => setOpenForm(false)} 
+            fullScreen={isMobile}
+            maxWidth="sm" 
+            fullWidth
+            PaperProps={{
+              sx: {
+                borderRadius: isMobile ? 0 : 3,
+                minHeight: isMobile ? '100vh' : 'auto',
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              fontSize: 20, 
+              fontWeight: 600,
+              pb: 1,
+              background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2
+            }}>
+              <PersonAddIcon />
+              Agregar Nuevo Residente
+              {selectedCasa && (
+                <Chip 
+                  label={`Casa #${selectedCasa.numero}`}
+                  size="small"
+                  sx={{ 
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    ml: 'auto'
+                  }}
+                />
+              )}
+            </DialogTitle>
+            <DialogContent sx={{ pt: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Complete la información del nuevo residente
+                  </Typography>
+                </Box>
+                <TextField 
+                  label="Nombre completo" 
+                  name="nombre" 
+                  value={formData.nombre}
+                  onChange={handleInputChange} 
+                  fullWidth 
+                  variant="outlined"
+                  placeholder="Ingrese el nombre completo"
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                  required
+                />
+                <TextField 
+                  label="Relación con la propiedad" 
+                  name="relacion" 
+                  value={formData.relacion}
+                  onChange={handleInputChange} 
+                  fullWidth 
+                  variant="outlined"
+                  placeholder="Ej: Propietario, Familiar, Inquilino, Empleado..."
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                  helperText="Especifique la relación del residente con la propiedad"
+                />
+                <Box sx={{ 
+                  p: 2, 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: 2,
+                  border: '1px solid #e9ecef'
+                }}>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Información:</strong> El residente será agregado a la casa #{selectedCasa?.numero} y podrá registrar visitas usando el código QR correspondiente.
+                  </Typography>
+                </Box>
+              </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenForm(false)} size="small">Cancelar</Button>
-              <Button onClick={handleAddResidente} size="small">Agregar</Button>
+            <DialogActions sx={{ p: 3, gap: 1 }}>
+              <Button 
+                onClick={() => {
+                  setOpenForm(false);
+                  setFormData({ nombre: "", relacion: "" });
+                }} 
+                variant="outlined"
+                size="medium"
+                sx={{ 
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleAddResidente} 
+                variant="contained"
+                size="medium"
+                disabled={!formData.nombre.trim()}
+                sx={{ 
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)',
+                  }
+                }}
+              >
+                Agregar Residente
+              </Button>
             </DialogActions>
           </Dialog>
 
-          <Dialog open={openAddCasa} onClose={() => setOpenAddCasa(false)} fullScreen={isMobile}>
-            <DialogTitle sx={{ fontSize: 16 }}>Agregar Casa</DialogTitle>
+          <Dialog 
+            open={openAddCasa} 
+            onClose={() => setOpenAddCasa(false)} 
+            fullScreen={isMobile}
+            maxWidth="sm" 
+            fullWidth
+            PaperProps={{
+              sx: {
+                borderRadius: isMobile ? 0 : 3,
+                minHeight: isMobile ? '100vh' : 'auto',
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              fontSize: 20, 
+              fontWeight: 600,
+              pb: 1,
+              background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)',
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2
+            }}>
+              <AddIcon />
+              Agregar Nueva Casa
+            </DialogTitle>
            
-            <DialogContent>
-              <TextField size="small" label="Número" name="numero" onChange={handleCasaChange} fullWidth />
+            <DialogContent sx={{ pt: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Typography variant="body2" color="textSecondary" gutterBottom>
+                    Complete la información de la nueva casa
+                  </Typography>
+                </Box>
+                <TextField 
+                  label="Número de Casa" 
+                  name="numero" 
+                  value={newCasa.numero}
+                  onChange={handleCasaChange} 
+                  fullWidth 
+                  variant="outlined"
+                  placeholder="Ej: 101, A-5, etc."
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                  required
+                />
+                <TextField 
+                  label="Propietario" 
+                  name="propietario" 
+                  value={newCasa.propietario}
+                  onChange={handleCasaChange} 
+                  fullWidth 
+                  variant="outlined"
+                  placeholder="Nombre completo del propietario"
+                  InputProps={{
+                    sx: { borderRadius: 2 }
+                  }}
+                  helperText="Especifique el nombre completo del propietario de la casa"
+                />
+                <Box sx={{ 
+                  p: 2, 
+                  backgroundColor: '#f8f9fa', 
+                  borderRadius: 2,
+                  border: '1px solid #e9ecef'
+                }}>
+                  <Typography variant="body2" color="textSecondary">
+                    <strong>Información:</strong> La casa será creada en estado activo por defecto. Podrá agregar residentes después de crearla.
+                  </Typography>
+                </Box>
+              </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenAddCasa(false)} size="small">Cancelar</Button>
-              <Button onClick={handleAddCasa} size="small">Agregar</Button>
+            <DialogActions sx={{ p: 3, gap: 1 }}>
+              <Button 
+                onClick={() => {
+                  setOpenAddCasa(false);
+                  setNewCasa({ numero: "", propietario: "" });
+                }} 
+                variant="outlined"
+                size="medium"
+                sx={{ 
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleAddCasa} 
+                variant="contained"
+                size="medium"
+                disabled={!newCasa.numero.trim()}
+                sx={{ 
+                  borderRadius: 2,
+                  px: 3,
+                  py: 1,
+                  background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)',
+                  }
+                }}
+              >
+                Agregar Casa
+              </Button>
             </DialogActions>
           </Dialog>
-        </Paper>
-      </Box>
-    </>
+      </Container>
+    </Box>
   );
 }
