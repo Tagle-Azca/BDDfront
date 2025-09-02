@@ -30,13 +30,21 @@ const Navbar = () => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
         position="static"
-        style={{ backgroundColor: "#FFF", boxShadow: "#000" }}
+        sx={{ 
+          backgroundColor: "#FFF", 
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          margin: 0,
+          width: "100%"
+        }}
       >
         <Toolbar
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            px: { xs: 2, sm: 3 },
+            py: 1,
+            minHeight: { xs: 56, sm: 64 }
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>

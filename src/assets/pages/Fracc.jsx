@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "../commponents/Navbar";
-import FraccTable from "../commponents/fraccTable";
+import ResidenceTable from "../commponents/ResidenceTable"; 
 import { Box } from "@mui/material";
 
 const MainPage = () => {
@@ -8,7 +8,7 @@ const MainPage = () => {
     <Box>
       <Navbar />
       <Box sx={{ padding: "50px" }}>
-        <FraccTable />
+        <ResidenceTable /> 
       </Box>
     </Box>
   );

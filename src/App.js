@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./assets/pages/Login";
 import FraccDashboard from "./assets/pages/Dashboard";
-import AdminDashboard from "./assets/pages/Admin";
+import AdminDashboard from "./assets/pages/EskayserAdmin";
 import Invitados from "./assets/pages/Invitados";
 import ReportesAdmin from "./assets/pages/ReportesAdmin";
 import AvisoPrivacidad from "./assets/pages/AvisoPrivacidad";
@@ -20,6 +20,6 @@ function App() {
       </Routes>
     </Router>
   );
-}
+}   
 
 export default App;

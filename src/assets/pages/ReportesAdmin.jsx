@@ -15,13 +15,16 @@ import {
   Alert,
   Card,
   CardContent,
-  Grid
+  Grid,
+  Pagination,
+  Stack
 } from "@mui/material";
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams, useNavigate } from "react-router-dom";
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import Navbar from "../commponents/Navbar";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
 
@@ -34,6 +37,10 @@ function ReportesAdmin() {
   const [rango, setRango] = useState("1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalReportes, setTotalReportes] = useState(0);
+  const [reportesPorPagina] = useState(20);
 
   const calcularFechas = () => {
     const hoy = dayjs();
@@ -43,7 +50,7 @@ function ReportesAdmin() {
     return { desde, hasta };
   };
 
-  const obtenerReportes = async () => {
+  const obtenerReportes = async (filtrarPorCasa = false, pagina = 1) => {
     try {
       setLoading(true);
       setError("");
@@ -51,14 +58,20 @@ function ReportesAdmin() {
       const { desde, hasta } = calcularFechas();
       
       let url;
-      let params = { desde, hasta, limite: 100 };
+      let params = { 
+        desde, 
+        hasta, 
+        limite: reportesPorPagina,
+        pagina: pagina,
+        ordenar: 'desc' 
+      };
 
-      if (casa && casa.trim() !== "") {
+      if (filtrarPorCasa && casa && casa.trim() !== "") {
         url = `${API_URL}/api/reportes/${fraccId}/casa/${casa}`;
-        console.log("Obteniendo reportes de casa:", casa);
+        console.log("Obteniendo reportes de casa:", casa, "página:", pagina);
       } else {
         url = `${API_URL}/api/reportes/${fraccId}`;
-        console.log("Obteniendo reportes de todo el fraccionamiento");
+        console.log("Obteniendo TODOS los reportes del fraccionamiento, página:", pagina);
       }
 
       const response = await axios.get(url, { params });
@@ -66,17 +79,34 @@ function ReportesAdmin() {
       console.log("Respuesta de reportes:", response.data);
 
       if (response.data.success) {
-        setReportes(response.data.reportes || []);
+        let reportesData = response.data.reportes || [];
+        
+        // Los reportes ya deberían venir ordenados del backend, pero por seguridad:
+        reportesData = reportesData.sort((a, b) => {
+          return new Date(b.tiempo) - new Date(a.tiempo);
+        });
+        
+        setReportes(reportesData);
         setEstadisticas(response.data.estadisticas || null);
+        
+        // Actualizar información de paginación
+        setCurrentPage(pagina);
+        setTotalReportes(response.data.total || reportesData.length);
+        setTotalPages(Math.ceil((response.data.total || reportesData.length) / reportesPorPagina));
+        
       } else {
         setError("Error al obtener reportes");
         setReportes([]);
+        setTotalReportes(0);
+        setTotalPages(1);
       }
 
     } catch (err) {
       console.error("Error al obtener reportes:", err);
       setError(err.response?.data?.error || "Error de conexión al obtener reportes");
       setReportes([]);
+      setTotalReportes(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -108,14 +138,41 @@ function ReportesAdmin() {
     }
   };
 
+  const handlePageChange = (event, newPage) => {
+    setCurrentPage(newPage);
+    obtenerReportes(casa && casa.trim() !== "", newPage);
+  };
+
+  const handleBuscar = () => {
+    setCurrentPage(1); // Reiniciar a página 1 al buscar
+    obtenerReportes(true, 1);
+  };
+
+  const handleVerTodos = () => {
+    setCasa("");
+    setCurrentPage(1);
+    obtenerReportes(false, 1);
+  };
+
+  // Efecto para cargar reportes cuando cambie el período
+  useEffect(() => {
+    if (fraccId && currentPage > 0) {
+      const tieneFiltroCasa = casa && casa.trim() !== "";
+      obtenerReportes(tieneFiltroCasa, currentPage);
+    }
+  }, [rango]); // Solo cuando cambie el rango de fechas
+
   useEffect(() => {
     if (fraccId) {
-      obtenerReportes();
+      // Cargar TODOS los reportes por defecto, sin filtro de casa
+      obtenerReportes(false, 1);
     }
   }, [fraccId]);
 
   return (
-    <Container sx={{ mt: 4, maxWidth: 'xl' }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      <Navbar />
+      <Container sx={{ py: 3, maxWidth: 'xl' }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
         Reportes del Fraccionamiento
       </Typography>
@@ -144,11 +201,19 @@ function ReportesAdmin() {
             </FormControl>
             <Button 
               variant="contained" 
-              onClick={obtenerReportes}
+              onClick={handleBuscar}
               disabled={loading}
               sx={{ minWidth: 120 }}
             >
               {loading ? "Buscando..." : "Buscar"}
+            </Button>
+            <Button 
+              variant="outlined" 
+              onClick={handleVerTodos}
+              disabled={loading}
+              sx={{ minWidth: 120 }}
+            >
+              Ver Todos
             </Button>
             <Button
               variant="outlined"
@@ -308,13 +373,31 @@ function ReportesAdmin() {
       </Card>
 
       {reportes.length > 0 && (
-        <Box mt={2} textAlign="center">
-          <Typography variant="body2" color="text.secondary">
-            Mostrando {reportes.length} reportes
-          </Typography>
-        </Box>
+        <Card sx={{ mt: 3 }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Mostrando {reportes.length} de {totalReportes} reportes (Página {currentPage} de {totalPages})
+              </Typography>
+              
+              <Stack spacing={2}>
+                <Pagination 
+                  count={totalPages} 
+                  page={currentPage} 
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="medium"
+                  showFirstButton 
+                  showLastButton
+                  disabled={loading}
+                />
+              </Stack>
+            </Box>
+          </CardContent>
+        </Card>
       )}
-    </Container>
+      </Container>
+    </Box>
   );
 }
 
