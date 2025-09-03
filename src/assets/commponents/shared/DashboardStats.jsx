@@ -129,14 +129,12 @@ const DashboardStats = ({ data = [] }) => {
         value: total,
         icon: HomeIcon,
         color: "primary",
-        trend: total > 0 ? `${total} propiedades registradas` : "Sin propiedades",
       },
       {
         title: "Casas Activas",
         value: activas,
         icon: CheckCircleIcon,
         color: "success",
-        trend: total > 0 ? `${((activas / total) * 100).toFixed(0)}% del total` : "0%",
         progress: total > 0 ? (activas / total) * 100 : 0,
       },
       {
@@ -144,7 +142,6 @@ const DashboardStats = ({ data = [] }) => {
         value: bloqueadas,
         icon: BlockIcon,
         color: "error",
-        trend: total > 0 ? `${((bloqueadas / total) * 100).toFixed(0)}% del total` : "0%",
         progress: total > 0 ? (bloqueadas / total) * 100 : 0,
       },
       {

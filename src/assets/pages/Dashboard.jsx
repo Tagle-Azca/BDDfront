@@ -49,7 +49,7 @@ export default function DashboardFracc() {
   const [openAddCasa, setOpenAddCasa] = useState(false);
   const [selectedCasa, setSelectedCasa] = useState(null);
   const [formData, setFormData] = useState({ nombre: "", relacion: "" });
-  const [newCasa, setNewCasa] = useState({ numero: "", propietario: "" });
+  const [newCasa, setNewCasa] = useState({ numero: "" });
 
   const isMobile = useMediaQuery("(max-width:600px)");
 
@@ -71,7 +71,6 @@ export default function DashboardFracc() {
       const dataFormatted = casas.map((casa, index) => ({
         id: index + 1,
         numero: casa.numero,
-        propietario: casa.propietario,
         activa: casa.activa, 
         residentes: casa.residentes.map((res) => ({
           nombre: res.nombre,
@@ -124,10 +123,10 @@ export default function DashboardFracc() {
   };
 
   const handleAddCasa = async () => {
-    if (!newCasa.numero || !newCasa.propietario) return;
+    if (!newCasa.numero) return;
     try {
       await axios.post(`${API_URL}/api/fraccionamientos/${user._id}/casas`, newCasa);
-      setNewCasa({ numero: "", propietario: ""});
+      setNewCasa({ numero: ""});
       setOpenAddCasa(false);
       fetchData();
     } catch (error) {
@@ -144,13 +143,24 @@ export default function DashboardFracc() {
     }
   };
 
+  const handleToggleResidentActive = async (house, residente) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/fraccionamientos/${user._id}/casas/${house.numero}/residentes/${residente._id}/toggle`
+      );
+      console.log(`✅ Residente ${response.data.residente.activo ? 'activado' : 'desactivado'}:`, response.data.message);
+      fetchData(); // Refrescar datos
+    } catch (error) {
+      console.error("❌ Error al cambiar estado del residente:", error);
+    }
+  };
+
   useEffect(() => {
     let filtered = data;
     
     if (searchValue) {
       filtered = filtered.filter((casa) => 
         casa.numero.toString().includes(searchValue) ||
-        casa.propietario?.toLowerCase().includes(searchValue.toLowerCase()) ||
         casa.residentes.some(res => 
           res.nombre.toLowerCase().includes(searchValue.toLowerCase())
         )
@@ -284,7 +294,7 @@ export default function DashboardFracc() {
             <SearchAndActions
               searchValue={searchValue}
               onSearchChange={setSearchValue}
-              placeholder="Buscar casa, propietario o residente..."
+              placeholder="Buscar casa o residente..."
               actions={searchActions}
               filters={filters}
               activeFilters={activeFilters}
@@ -349,6 +359,7 @@ export default function DashboardFracc() {
                       onAddResident={handleAddResident}
                       onToggleActive={toggleCasaActiva}
                       onShowQR={handleShowQR}
+                      onToggleResidentActive={handleToggleResidentActive}
                       sx={{
                         height: viewMode === "list" ? "auto" : "100%",
                       }}
@@ -458,7 +469,7 @@ export default function DashboardFracc() {
               Agregar Nuevo Residente
               {selectedCasa && (
                 <Chip 
-                  label={`Casa #${selectedCasa.numero}`}
+                  label={`Casa ${selectedCasa.numero}`}
                   size="small"
                   sx={{ 
                     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -508,7 +519,7 @@ export default function DashboardFracc() {
                   border: '1px solid #e9ecef'
                 }}>
                   <Typography variant="body2" color="textSecondary">
-                    <strong>Información:</strong> El residente será agregado a la casa #{selectedCasa?.numero} y podrá registrar visitas usando el código QR correspondiente.
+                    <strong>Información:</strong> El residente será agregado a la casa {selectedCasa?.numero} y podrá registrar visitas usando el código QR correspondiente.
                   </Typography>
                 </Box>
               </Box>
@@ -596,36 +607,14 @@ export default function DashboardFracc() {
                   }}
                   required
                 />
-                <TextField 
-                  label="Propietario" 
-                  name="propietario" 
-                  value={newCasa.propietario}
-                  onChange={handleCasaChange} 
-                  fullWidth 
-                  variant="outlined"
-                  placeholder="Nombre completo del propietario"
-                  InputProps={{
-                    sx: { borderRadius: 2 }
-                  }}
-                  helperText="Especifique el nombre completo del propietario de la casa"
-                />
-                <Box sx={{ 
-                  p: 2, 
-                  backgroundColor: '#f8f9fa', 
-                  borderRadius: 2,
-                  border: '1px solid #e9ecef'
-                }}>
-                  <Typography variant="body2" color="textSecondary">
-                    <strong>Información:</strong> La casa será creada en estado activo por defecto. Podrá agregar residentes después de crearla.
-                  </Typography>
-                </Box>
+               
               </Box>
             </DialogContent>
             <DialogActions sx={{ p: 3, gap: 1 }}>
               <Button 
                 onClick={() => {
                   setOpenAddCasa(false);
-                  setNewCasa({ numero: "", propietario: "" });
+                  setNewCasa({ numero: "" });
                 }} 
                 variant="outlined"
                 size="medium"
@@ -643,6 +632,7 @@ export default function DashboardFracc() {
                 size="medium"
                 disabled={!newCasa.numero.trim()}
                 sx={{ 
+                  color: 'white', 
                   borderRadius: 2,
                   px: 3,
                   py: 1,
@@ -656,6 +646,7 @@ export default function DashboardFracc() {
               </Button>
             </DialogActions>
           </Dialog>
+
       </Container>
     </Box>
   );

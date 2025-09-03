@@ -25,6 +25,10 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Group as GroupIcon,
+  PersonOff as PersonOffIcon,
+  RestoreFromTrash as RestoreFromTrashIcon,
+  ToggleOff as ToggleOffIcon,
+  ToggleOn as ToggleOnIcon,
 } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
 
@@ -33,6 +37,7 @@ const HouseCard = ({
   onAddResident,
   onToggleActive,
   onShowQR,
+  onToggleResidentActive,
   sx = {},
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -68,10 +73,7 @@ const HouseCard = ({
           </Avatar>
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h6" fontWeight="bold" color="primary.main">
-              Casa #{house.numero}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {house.propietario || "Sin propietario"}
+              Casa {house.numero}
             </Typography>
           </Box>
           <StatusChip
@@ -85,14 +87,6 @@ const HouseCard = ({
           <Typography variant="body2" color="textSecondary">
             {house.residentes.length} residente{house.residentes.length !== 1 ? "s" : ""}
           </Typography>
-          {house.residentes.length > 0 && (
-            <Chip
-              label={`${house.residentes.length}`}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
-          )}
         </Box>
 
         {house.residentes.length > 0 && (
@@ -110,18 +104,72 @@ const HouseCard = ({
         <Collapse in={expanded} timeout="auto" unmountOnExit>
           <List dense sx={{ bgcolor: "background.paper", borderRadius: 1, mt: 1 }}>
             {house.residentes.map((residente, index) => (
-              <ListItem key={index} divider={index < house.residentes.length - 1}>
+              <ListItem 
+                key={index} 
+                divider={index < house.residentes.length - 1}
+                sx={{
+                  opacity: residente.activo === false ? 0.6 : 1,
+                  transition: "opacity 0.3s ease"
+                }}
+              >
                 <ListItemAvatar>
-                  <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.light" }}>
-                    <PersonIcon fontSize="small" />
+                  <Avatar sx={{ 
+                    width: 32, 
+                    height: 32, 
+                    bgcolor: residente.activo === false ? "grey.400" : "primary.light" 
+                  }}>
+                    {residente.activo === false ? (
+                      <PersonOffIcon fontSize="small" />
+                    ) : (
+                      <PersonIcon fontSize="small" />
+                    )}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
-                  primary={residente.nombre}
+                  primary={
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                        {residente.nombre}
+                      </Typography>
+                      <Chip
+                        label={residente.activo === false ? "Inactivo" : "Activo"}
+                        size="small"
+                        color={residente.activo === false ? "error" : "success"}
+                        variant="outlined"
+                        sx={{ fontSize: "0.7rem", height: 20 }}
+                      />
+                    </Box>
+                  }
                   secondary={residente.relacion || "Sin especificar"}
-                  primaryTypographyProps={{ fontSize: "0.875rem" }}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
+                <Box sx={{ ml: 1 }}>
+                  <Tooltip 
+                    title={residente.activo === false ? "Reactivar residente" : "Desactivar residente"}
+                  >
+                    <IconButton
+                      size="small"
+                      onClick={() => onToggleResidentActive && onToggleResidentActive(house, residente)}
+                      color={residente.activo === false ? "success" : "error"}
+                      sx={{ 
+                        width: 28, 
+                        height: 28,
+                        border: "1px solid",
+                        borderColor: residente.activo === false ? "success.main" : "error.main",
+                        "&:hover": { 
+                          bgcolor: residente.activo === false ? "success.light" : "error.light",
+                          color: "white"
+                        }
+                      }}
+                    >
+                      {residente.activo === false ? (
+                        <RestoreFromTrashIcon sx={{ fontSize: 16 }} />
+                      ) : (
+                        <PersonOffIcon sx={{ fontSize: 16 }} />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </ListItem>
             ))}
           </List>
