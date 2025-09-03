@@ -36,6 +36,7 @@ import LoadingState from "../commponents/shared/LoadingState";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
 
+
 export default function DashboardFracc() {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -81,7 +82,6 @@ export default function DashboardFracc() {
       setData(dataFormatted);
       setFilteredData(dataFormatted);
     } catch (error) {
-      console.error("❌ Error al obtener datos del fraccionamiento:", error);
     } finally {
       setLoading(false);
     }
@@ -90,8 +90,6 @@ export default function DashboardFracc() {
   useEffect(() => {
     fetchData();
   }, []);
-
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -118,7 +116,6 @@ export default function DashboardFracc() {
       setFormData({ nombre: "", relacion: "" });
       fetchData();
     } catch (error) {
-      console.error("❌ Error al agregar residente:", error);
     }
   };
 
@@ -126,11 +123,10 @@ export default function DashboardFracc() {
     if (!newCasa.numero) return;
     try {
       await axios.post(`${API_URL}/api/fraccionamientos/${user._id}/casas`, newCasa);
-      setNewCasa({ numero: ""});
+      setNewCasa({ numero: "" });
       setOpenAddCasa(false);
       fetchData();
     } catch (error) {
-      console.error("❌ Error al agregar casa:", error);
     }
   };
 
@@ -148,10 +144,8 @@ export default function DashboardFracc() {
       const response = await axios.put(
         `${API_URL}/api/fraccionamientos/${user._id}/casas/${house.numero}/residentes/${residente._id}/toggle`
       );
-      console.log(`✅ Residente ${response.data.residente.activo ? 'activado' : 'desactivado'}:`, response.data.message);
-      fetchData(); // Refrescar datos
+      fetchData();
     } catch (error) {
-      console.error("❌ Error al cambiar estado del residente:", error);
     }
   };
 
@@ -405,9 +399,6 @@ export default function DashboardFracc() {
                 mx: 'auto',
                 maxWidth: 280
               }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#0ba969', mb: 2 }}>
-                  Código para Visitas
-                </Typography>
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
                     qrValue
@@ -421,9 +412,6 @@ export default function DashboardFracc() {
                   }}
                 />
               </Box>
-              <Typography variant="body2" color="textSecondary" sx={{ mt: 2, maxWidth: 400, mx: 'auto' }}>
-                Los visitantes pueden usar este código QR para registrarse en la aplicación móvil
-              </Typography>
             </DialogContent>
             <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
               <Button 
@@ -481,11 +469,7 @@ export default function DashboardFracc() {
             </DialogTitle>
             <DialogContent sx={{ pt: 3 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Box>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Complete la información del nuevo residente
-                  </Typography>
-                </Box>
+
                 <TextField 
                   label="Nombre completo" 
                   name="nombre" 

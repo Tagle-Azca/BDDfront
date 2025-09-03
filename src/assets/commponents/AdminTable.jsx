@@ -64,7 +64,7 @@ const AdminTable = () => {
 
       setRows(data);
     } catch (error) {
-      console.error("❌ Error al obtener los fraccionamientos:", error);
+      console.error("Error al obtener los fraccionamientos:", error);
       setError("Error al cargar los datos");
     } finally {
       setLoading(false);

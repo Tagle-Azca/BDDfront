@@ -34,7 +34,6 @@ const SearchAndActions = ({
 }) => {
   return (
     <Box sx={{ mb: 3 }}>
-      {/* Search and primary actions row */}
       <Box sx={{ 
         display: "flex", 
         gap: 2, 
@@ -55,7 +54,6 @@ const SearchAndActions = ({
           }}
         />
         
-        {/* Filter dropdowns */}
         {filters.map((filter) => (
           <FormControl key={filter.key} sx={{ minWidth: 120 }}>
             <InputLabel>{filter.label}</InputLabel>
@@ -74,7 +72,6 @@ const SearchAndActions = ({
           </FormControl>
         ))}
 
-        {/* Action buttons */}
         <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
           {actions.map((action, index) => (
             <Button
@@ -91,7 +88,6 @@ const SearchAndActions = ({
         </Box>
       </Box>
 
-      {/* Active filters row */}
       {activeFilters.length > 0 && (
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
           <span style={{ fontSize: '14px', color: '#666' }}>Filtros activos:</span>

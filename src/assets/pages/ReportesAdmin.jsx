@@ -68,28 +68,21 @@ function ReportesAdmin() {
 
       if (filtrarPorCasa && casa && casa.trim() !== "") {
         url = `${API_URL}/api/reportes/${fraccId}/casa/${casa}`;
-        console.log("Obteniendo reportes de casa:", casa, "página:", pagina);
       } else {
         url = `${API_URL}/api/reportes/${fraccId}`;
-        console.log("Obteniendo TODOS los reportes del fraccionamiento, página:", pagina);
       }
 
       const response = await axios.get(url, { params });
-      
-      console.log("Respuesta de reportes:", response.data);
 
       if (response.data.success) {
         let reportesData = response.data.reportes || [];
         
-        // Los reportes ya deberían venir ordenados del backend, pero por seguridad:
         reportesData = reportesData.sort((a, b) => {
           return new Date(b.tiempo) - new Date(a.tiempo);
         });
         
         setReportes(reportesData);
         setEstadisticas(response.data.estadisticas || null);
-        
-        // Actualizar información de paginación
         setCurrentPage(pagina);
         setTotalReportes(response.data.total || reportesData.length);
         setTotalPages(Math.ceil((response.data.total || reportesData.length) / reportesPorPagina));
@@ -102,7 +95,6 @@ function ReportesAdmin() {
       }
 
     } catch (err) {
-      console.error("Error al obtener reportes:", err);
       setError(err.response?.data?.error || "Error de conexión al obtener reportes");
       setReportes([]);
       setTotalReportes(0);
@@ -144,7 +136,7 @@ function ReportesAdmin() {
   };
 
   const handleBuscar = () => {
-    setCurrentPage(1); // Reiniciar a página 1 al buscar
+    setCurrentPage(1);
     obtenerReportes(true, 1);
   };
 
@@ -154,17 +146,15 @@ function ReportesAdmin() {
     obtenerReportes(false, 1);
   };
 
-  // Efecto para cargar reportes cuando cambie el período
   useEffect(() => {
     if (fraccId && currentPage > 0) {
       const tieneFiltroCasa = casa && casa.trim() !== "";
       obtenerReportes(tieneFiltroCasa, currentPage);
     }
-  }, [rango]); // Solo cuando cambie el rango de fechas
+  }, [rango]);
 
   useEffect(() => {
     if (fraccId) {
-      // Cargar TODOS los reportes por defecto, sin filtro de casa
       obtenerReportes(false, 1);
     }
   }, [fraccId]);

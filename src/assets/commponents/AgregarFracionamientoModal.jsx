@@ -15,7 +15,6 @@ const AgregarFraccionamientoModal = ({ open, handleClose, fetchData }) => {
     telefono: "",
     estado: "activo",
   });
-//pruebas
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -47,7 +46,6 @@ const AgregarFraccionamientoModal = ({ open, handleClose, fetchData }) => {
       <DialogTitle>Agregar Fraccionamiento</DialogTitle>
       <DialogContent>
         <InputField label="Fraccionamiento" name="nombre" value={formData.nombre} onChange={handleInputChange} />
-        
         <InputField label="Usuario" name="usuario" value={formData.usuario} onChange={handleInputChange} />
         <InputField label="Contraseña" name="contrasena" type="password" value={formData.contrasena} onChange={handleInputChange} />
         <InputField label="Dirección" name="direccion" value={formData.direccion} onChange={handleInputChange} />

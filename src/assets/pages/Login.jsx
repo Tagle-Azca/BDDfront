@@ -28,8 +28,6 @@ function Login() {
       });
 
       const data = await response.json();
-      console.log("🔍 Login response status:", response.status);
-      console.log("🔍 Login response body:", data);
 
       if (!response.ok) {
         setError(data.error || "Credenciales incorrectas");
@@ -46,7 +44,6 @@ function Login() {
         navigate(`/dashboard/${data.user._id}`);
       }
     } catch (error) {
-      console.error("❌ Error en login:", error);
       setError("Error al conectar con el servidor.");
     }
   };

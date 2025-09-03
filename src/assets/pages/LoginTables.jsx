@@ -6,13 +6,12 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
-  const [error, setError] = useState(""); // Estado para manejar errores
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validar que los campos no estén vacíos
     if (!correo || !contrasena) {
       setError("Correo y contraseña son obligatorios");
       return;
@@ -32,7 +31,6 @@ const Login = () => {
         localStorage.setItem("Usuario", data.usuario); 
         navigate("/"); 
       } else {
-   
         setError(data.error || "Error al iniciar sesión");
       }
     } catch (error) {
@@ -83,7 +81,7 @@ const Login = () => {
           required
           sx={{ mt: 2 }}
         />
-        {error && ( // Mostrar mensaje de error si existe
+        {error && (
           <Box sx={{ color: "red", mt: 2, textAlign: "center" }}>{error}</Box>
         )}
         <Button

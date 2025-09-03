@@ -88,7 +88,6 @@ const StatCard = ({
       )}
     </CardContent>
     
-    {/* Decorative background pattern */}
     <Box
       sx={{
         position: "absolute",

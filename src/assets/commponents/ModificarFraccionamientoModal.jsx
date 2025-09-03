@@ -26,9 +26,8 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       correo: fraccionamiento.correo || "",
       telefono: fraccionamiento.telefono || "",
       estado: fraccionamiento.estado || "",
-      contrasena: "", 
+      contrasena: "",
     });
-  
   }, [fraccionamiento]);
 
   const handleInputChange = (e) => {
@@ -41,16 +40,11 @@ const EditarFraccionamientoModal = ({ open, handleClose, fraccionamiento, fetchD
       console.error("No se puede actualizar: ID no válido");
       return;
     }
-  
    const requestUrl = `${API_URL}/api/fraccionamientos/update/${fraccionamiento._id}`;
-  
 
     const updateData = Object.fromEntries(
       Object.entries(formData).filter(([key, value]) => value.trim() !== "")
     );
-  
-    console.log("URL de actualización que se enviará:", requestUrl);
-    console.log("Datos enviados al backend (filtrados):", updateData);
   
     try {
       const response = await axios.put(requestUrl, updateData);

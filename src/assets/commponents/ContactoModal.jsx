@@ -4,7 +4,6 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } 
 const ContactoModal = ({ open, handleClose, contacto }) => {
 
   const [contactoData, setContactoData] = useState({
-    
     correo: "",
     telefono: "",
     direccion: "",
@@ -45,7 +44,7 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
       const data = await response.json();
       if (response.ok) {
         alert("Contacto agregado con éxito");
-        handleClose(); 
+        handleClose();
       } else {
         alert(data.error || "Error al agregar contacto");
       }
@@ -59,7 +58,6 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>Información del Contacto</DialogTitle>
       <DialogContent>
-       
         
         <TextField
           label="Correo"
@@ -85,7 +83,7 @@ const ContactoModal = ({ open, handleClose, contacto }) => {
           value={contactoData.direccion}
           fullWidth
           margin="normal"
-          s
+          onChange={handleInputChange}
         />
       </DialogContent>
       <DialogActions>

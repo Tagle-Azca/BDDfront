@@ -65,7 +65,6 @@ function Invitados() {
 
   const enviarNotificacion = async (fraccId, residencia, nombre, motivo, fotoUrl) => {
     try {
-      console.log("Enviando notificación...", { fraccId, residencia, nombre });
       
       const response = await fetch(`${API_URL}/api/notifications/send-notification`, {
         method: "POST",
@@ -84,15 +83,12 @@ function Invitados() {
       const data = await response.json();
       
       if (data.success) {
-        console.log("Notificación enviada:", data.mensaje);
         return { success: true, notificationId: data.notificationId };
       } else {
-        console.error("Error enviando notificación:", data.error);
         return { success: false, error: data.error };
       }
       
     } catch (error) {
-      console.error("Error en enviarNotificacion:", error);
       return { success: false, error: "Error de conexión al enviar notificación" };
     }
   };
@@ -128,7 +124,6 @@ function Invitados() {
     try {
       setLoading(true);
       
-      console.log("Registrando visita...");
       const responseVisita = await fetch(`${API_URL}/api/fraccionamientos/${fraccId}/casas/${residencia}/visitas`, {
         method: "POST",
         body: formData,
@@ -142,7 +137,6 @@ function Invitados() {
         return;
       }
 
-      console.log("Visita registrada:", dataVisita.mensaje);
 
       const resultadoNotificacion = await enviarNotificacion(
         fraccId,
@@ -161,17 +155,12 @@ function Invitados() {
         setFotoVisita(null);
         setErrorGeneral("");
         setFotoError(false);
-        
-        console.log("Proceso completado exitosamente");
       } else {
         setExito(dataVisita.mensaje);
         setErrorGeneral(`Advertencia: ${resultadoNotificacion.error || "No se pudo notificar a los residentes"}`);
-        
-        console.log("Visita registrada pero notificación falló");
       }
 
     } catch (err) {
-      console.error("Error en handleSubmit:", err);
       setErrorGeneral("Error de conexión. Intenta nuevamente.");
     } finally {
       setLoading(false);

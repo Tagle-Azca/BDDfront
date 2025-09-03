@@ -66,7 +66,6 @@ export default function TableAdmin() {
       setFilteredRows(data);
       setLoading(false);
     } catch (error) {
-      console.error("❌ Error al obtener los fraccionamientos:", error);
       setLoading(false);
     }
   };
@@ -135,7 +134,6 @@ export default function TableAdmin() {
   
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", padding: 2 }}>
-      
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <TextField
           label="Buscar..."
@@ -201,7 +199,7 @@ export default function TableAdmin() {
                     <QrCodeIcon />
                   </IconButton>
                   <IconButton onClick={() => handleOpenEditar(row)}>
-                    <EditIcon /> {/* Icono de edición */}
+                    <EditIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>

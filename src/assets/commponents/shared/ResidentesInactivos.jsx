@@ -67,15 +67,10 @@ export default function ResidentesInactivos({ open, onClose, fraccionamientoId, 
       
       setSuccess(`${residente.nombre} ha sido restablecido exitosamente`);
       
-      // Remover de la lista local
       setResidentes(prev => prev.filter(r => r._id !== residente._id));
-      
-      // Notificar al componente padre
       if (onResidenteRestored) {
         onResidenteRestored(response.data.residente);
       }
-      
-      // Limpiar mensaje después de 3 segundos
       setTimeout(() => setSuccess(""), 3000);
       
     } catch (error) {
