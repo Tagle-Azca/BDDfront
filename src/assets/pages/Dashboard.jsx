@@ -197,7 +197,7 @@ export default function DashboardFracc() {
 
   const handleShowQR = (house) => {
     const fraccId = user._id;
-    setQrValue(`${fraccId}&casa=${house.numero}`);
+    setQrValue(`https://admin-one-livid.vercel.app/Visitas?id=${fraccId}&casa=${house.numero}`);
     setOpenQR(true);
   };
 

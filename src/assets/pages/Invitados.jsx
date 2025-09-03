@@ -30,8 +30,12 @@ function Invitados() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const fraccId = urlParams.get("id");
+    const casaParam = urlParams.get("casa");
 
-    if (!fraccId) return;
+    if (!fraccId) {
+      setErrorGeneral("QR sin fraccionamiento válido");
+      return;
+    }
 
     fetch(`${API_URL}/api/fraccionamientos/${fraccId}`)
       .then((res) => res.json())
@@ -41,10 +45,15 @@ function Invitados() {
             .filter((c) => c.activa === true)
             .map((c) => c.numero);
           setResidencias(lista);
+          
+          if (casaParam && lista.includes(parseInt(casaParam))) {
+            setResidencia(casaParam);
+          }
         }
       })
       .catch((err) => {
         console.error("Error al cargar residencias:", err);
+        setErrorGeneral("Error al cargar fraccionamiento");
       });
   }, []);
 
