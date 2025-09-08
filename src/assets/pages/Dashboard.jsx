@@ -74,8 +74,10 @@ export default function DashboardFracc() {
         numero: casa.numero,
         activa: casa.activa, 
         residentes: casa.residentes.map((res) => ({
+          _id: res._id,
           nombre: res.nombre,
           relacion: res.relacion,
+          activo: res.activo,
         })),
       }));
 
@@ -139,15 +141,6 @@ export default function DashboardFracc() {
     }
   };
 
-  const handleToggleResidentActive = async (house, residente) => {
-    try {
-      const response = await axios.put(
-        `${API_URL}/api/fraccionamientos/${user._id}/casas/${house.numero}/residentes/${residente._id}/toggle`
-      );
-      fetchData();
-    } catch (error) {
-    }
-  };
 
   const handleDeleteResident = async (house, residente) => {
     try {
@@ -364,7 +357,6 @@ export default function DashboardFracc() {
                       onAddResident={handleAddResident}
                       onToggleActive={toggleCasaActiva}
                       onShowQR={handleShowQR}
-                      onToggleResidentActive={handleToggleResidentActive}
                       onDeleteResident={handleDeleteResident}
                       sx={{
                         height: viewMode === "list" ? "auto" : "100%",

@@ -25,10 +25,6 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Group as GroupIcon,
-  PersonOff as PersonOffIcon,
-  RestoreFromTrash as RestoreFromTrashIcon,
-  ToggleOff as ToggleOffIcon,
-  ToggleOn as ToggleOnIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
@@ -38,7 +34,6 @@ const HouseCard = ({
   onAddResident,
   onToggleActive,
   onShowQR,
-  onToggleResidentActive,
   onDeleteResident,
   sx = {},
 }) => {
@@ -109,70 +104,27 @@ const HouseCard = ({
               <ListItem 
                 key={index} 
                 divider={index < house.residentes.length - 1}
-                sx={{
-                  opacity: residente.activo === false ? 0.6 : 1,
-                  transition: "opacity 0.3s ease"
-                }}
               >
                 <ListItemAvatar>
                   <Avatar sx={{ 
                     width: 32, 
                     height: 32, 
-                    bgcolor: residente.activo === false ? "grey.400" : "primary.light" 
+                    bgcolor: "primary.light" 
                   }}>
-                    {residente.activo === false ? (
-                      <PersonOffIcon fontSize="small" />
-                    ) : (
-                      <PersonIcon fontSize="small" />
-                    )}
+                    <PersonIcon fontSize="small" />
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
                   primary={
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                        {residente.nombre}
-                      </Typography>
-                      <Chip
-                        label={residente.activo === false ? "Inactivo" : "Activo"}
-                        size="small"
-                        color={residente.activo === false ? "error" : "success"}
-                        variant="outlined"
-                        sx={{ fontSize: "0.7rem", height: 20 }}
-                      />
-                    </Box>
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      {residente.nombre}
+                    </Typography>
                   }
                   secondary={residente.relacion || "Sin especificar"}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
-                <Box sx={{ ml: 1, display: "flex", gap: 0.5 }}>
-                  <Tooltip 
-                    title={residente.activo === false ? "Reactivar residente" : "Desactivar residente"}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() => onToggleResidentActive && onToggleResidentActive(house, residente)}
-                      color={residente.activo === false ? "success" : "warning"}
-                      sx={{ 
-                        width: 28, 
-                        height: 28,
-                        border: "1px solid",
-                        borderColor: residente.activo === false ? "success.main" : "warning.main",
-                        "&:hover": { 
-                          bgcolor: residente.activo === false ? "success.light" : "warning.light",
-                          color: "white"
-                        }
-                      }}
-                    >
-                      {residente.activo === false ? (
-                        <RestoreFromTrashIcon sx={{ fontSize: 16 }} />
-                      ) : (
-                        <PersonOffIcon sx={{ fontSize: 16 }} />
-                      )}
-                    </IconButton>
-                  </Tooltip>
-                  
-                  <Tooltip title="Eliminar residente permanentemente">
+                <Box sx={{ ml: 1 }}>
+                  <Tooltip title="Eliminar residente">
                     <IconButton
                       size="small"
                       onClick={() => onDeleteResident && onDeleteResident(house, residente)}
