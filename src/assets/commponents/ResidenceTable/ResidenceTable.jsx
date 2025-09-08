@@ -9,7 +9,7 @@ const ResidenceTable = () => {
   const [search, setSearch] = useState("");
   const [openForm, setOpenForm] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const { residences, loading, addResident } = useResidences();
+  const { residences, loading, addResident, deleteResident } = useResidences();
 
   const filteredRows = residences.filter(
     (row) =>
@@ -37,6 +37,14 @@ const ResidenceTable = () => {
     handleCloseForm();
   };
 
+  const handleDeleteResident = async (residenceId, residentId) => {
+    try {
+      await deleteResident(residenceId, residentId);
+    } catch (error) {
+      console.error("Error al eliminar residente:", error);
+    }
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -52,6 +60,7 @@ const ResidenceTable = () => {
         <ResidenceTableView 
           rows={filteredRows}
           onAddResident={handleOpenForm}
+          onDeleteResident={handleDeleteResident}
         />
       </Paper>
 

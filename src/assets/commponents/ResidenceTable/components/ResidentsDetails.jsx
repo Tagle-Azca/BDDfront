@@ -10,10 +10,12 @@ import {
   Avatar,
   Chip,
   Paper,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import { Person, Phone } from "@mui/icons-material";
+import { Person, Phone, Delete } from "@mui/icons-material";
 
-const ResidentsDetails = ({ residents }) => (
+const ResidentsDetails = ({ residents, onDeleteResident }) => (
   <Box sx={{ margin: 2 }}>
     <Paper 
       elevation={0}
@@ -56,6 +58,9 @@ const ResidentsDetails = ({ residents }) => (
               <TableCell sx={{ fontWeight: 600, border: "none" }}>
                 Estado
               </TableCell>
+              <TableCell sx={{ fontWeight: 600, border: "none", width: 100 }}>
+                Acciones
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -92,6 +97,23 @@ const ResidentsDetails = ({ residents }) => (
                     size="small"
                     sx={{ borderRadius: "6px" }}
                   />
+                </TableCell>
+                <TableCell sx={{ border: "none" }}>
+                  <Tooltip title="Eliminar residente">
+                    <IconButton
+                      size="small"
+                      onClick={() => onDeleteResident(residente._id)}
+                      sx={{
+                        color: "error.main",
+                        "&:hover": {
+                          backgroundColor: "error.light",
+                          color: "white",
+                        },
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </TableCell>
               </TableRow>
             ))}

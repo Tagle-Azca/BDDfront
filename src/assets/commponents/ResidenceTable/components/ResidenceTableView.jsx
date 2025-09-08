@@ -12,7 +12,7 @@ import {
 import ResidenceRow from "./ResidenceRow";
 import EmptyState from "./EmptyState";
 
-const ResidenceTableView = ({ rows, onAddResident }) => (
+const ResidenceTableView = ({ rows, onAddResident, onDeleteResident }) => (
   <Paper 
     elevation={0}
     sx={{ 
@@ -49,6 +49,7 @@ const ResidenceTableView = ({ rows, onAddResident }) => (
                 key={row._id} 
                 row={row} 
                 onAddResident={onAddResident}
+                onDeleteResident={onDeleteResident}
               />
             ))
           )}

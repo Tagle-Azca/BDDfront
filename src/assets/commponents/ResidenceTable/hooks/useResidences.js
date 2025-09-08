@@ -65,10 +65,31 @@ export const useResidences = () => {
     }
   };
 
+  const deleteResident = async (residenceId, residentId) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/api/residencias/delete-residente/${residenceId}/${residentId}`
+      );
+
+      const updatedResidence = response.data.data;
+      setResidences(prev => 
+        prev.map(residence => 
+          residence._id === updatedResidence._id
+            ? { ...residence, residentes: updatedResidence.residentes }
+            : residence
+        )
+      );
+    } catch (error) {
+      console.error("Error al eliminar el residente:", error);
+      throw error;
+    }
+  };
+
   return {
     residences,
     loading,
     addResident,
+    deleteResident,
     refetch: fetchResidences,
   };
 };

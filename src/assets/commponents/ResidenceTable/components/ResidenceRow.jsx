@@ -18,7 +18,7 @@ import {
 } from "@mui/icons-material";
 import ResidentsDetails from "./ResidentsDetails";
 
-const ResidenceRow = ({ row, onAddResident }) => {
+const ResidenceRow = ({ row, onAddResident, onDeleteResident }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -106,7 +106,10 @@ const ResidenceRow = ({ row, onAddResident }) => {
           colSpan={6}
         >
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <ResidentsDetails residents={row.residentes} />
+            <ResidentsDetails 
+              residents={row.residentes} 
+              onDeleteResident={(residentId) => onDeleteResident(row._id, residentId)}
+            />
           </Collapse>
         </TableCell>
       </TableRow>
