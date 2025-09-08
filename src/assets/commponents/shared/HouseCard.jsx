@@ -29,6 +29,7 @@ import {
   RestoreFromTrash as RestoreFromTrashIcon,
   ToggleOff as ToggleOffIcon,
   ToggleOn as ToggleOnIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
 
@@ -38,6 +39,7 @@ const HouseCard = ({
   onToggleActive,
   onShowQR,
   onToggleResidentActive,
+  onDeleteResident,
   sx = {},
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -143,21 +145,21 @@ const HouseCard = ({
                   secondary={residente.relacion || "Sin especificar"}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
-                <Box sx={{ ml: 1 }}>
+                <Box sx={{ ml: 1, display: "flex", gap: 0.5 }}>
                   <Tooltip 
                     title={residente.activo === false ? "Reactivar residente" : "Desactivar residente"}
                   >
                     <IconButton
                       size="small"
                       onClick={() => onToggleResidentActive && onToggleResidentActive(house, residente)}
-                      color={residente.activo === false ? "success" : "error"}
+                      color={residente.activo === false ? "success" : "warning"}
                       sx={{ 
                         width: 28, 
                         height: 28,
                         border: "1px solid",
-                        borderColor: residente.activo === false ? "success.main" : "error.main",
+                        borderColor: residente.activo === false ? "success.main" : "warning.main",
                         "&:hover": { 
-                          bgcolor: residente.activo === false ? "success.light" : "error.light",
+                          bgcolor: residente.activo === false ? "success.light" : "warning.light",
                           color: "white"
                         }
                       }}
@@ -167,6 +169,26 @@ const HouseCard = ({
                       ) : (
                         <PersonOffIcon sx={{ fontSize: 16 }} />
                       )}
+                    </IconButton>
+                  </Tooltip>
+                  
+                  <Tooltip title="Eliminar residente permanentemente">
+                    <IconButton
+                      size="small"
+                      onClick={() => onDeleteResident && onDeleteResident(house, residente)}
+                      color="error"
+                      sx={{ 
+                        width: 28, 
+                        height: 28,
+                        border: "1px solid",
+                        borderColor: "error.main",
+                        "&:hover": { 
+                          bgcolor: "error.main",
+                          color: "white"
+                        }
+                      }}
+                    >
+                      <DeleteIcon sx={{ fontSize: 16 }} />
                     </IconButton>
                   </Tooltip>
                 </Box>

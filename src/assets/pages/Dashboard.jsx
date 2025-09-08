@@ -149,6 +149,17 @@ export default function DashboardFracc() {
     }
   };
 
+  const handleDeleteResident = async (house, residente) => {
+    try {
+      await axios.delete(
+        `${API_URL}/api/fraccionamientos/${user._id}/casas/${house.numero}/residentes/${residente._id}`
+      );
+      fetchData();
+    } catch (error) {
+      console.error("Error al eliminar residente:", error);
+    }
+  };
+
   useEffect(() => {
     let filtered = data;
     
@@ -354,6 +365,7 @@ export default function DashboardFracc() {
                       onToggleActive={toggleCasaActiva}
                       onShowQR={handleShowQR}
                       onToggleResidentActive={handleToggleResidentActive}
+                      onDeleteResident={handleDeleteResident}
                       sx={{
                         height: viewMode === "list" ? "auto" : "100%",
                       }}
