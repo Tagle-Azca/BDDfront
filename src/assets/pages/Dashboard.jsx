@@ -1,31 +1,22 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import QrCodeIcon from "@mui/icons-material/QrCode";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
   Typography,
   Box,
-  useMediaQuery,
   Container,
-  Chip,
   Grid,
   ToggleButton,
   ToggleButtonGroup,
   Fade,
-  CircularProgress,
 } from "@mui/material";
 import {
   ViewModule as GridViewIcon,
   ViewList as ListViewIcon,
 } from "@mui/icons-material";
 import axios from "axios";
+
+// Components
 import Navbar from "../commponents/Navbar";
 import AdminHeader from "../commponents/shared/AdminHeader";
 import SearchAndActions from "../commponents/shared/SearchAndActions";
@@ -33,6 +24,12 @@ import HouseCard from "../commponents/shared/HouseCard";
 import DashboardStats from "../commponents/shared/DashboardStats";
 import EmptyState from "../commponents/shared/EmptyState";
 import LoadingState from "../commponents/shared/LoadingState";
+
+// Modals
+import ResidentFormModal from "../commponents/modals/ResidentFormModal";
+import EditResidentModal from "../commponents/modals/EditResidentModal";
+import AddHouseModal from "../commponents/modals/AddHouseModal";
+import QRModal from "../commponents/modals/QRModal";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
 
@@ -48,22 +45,23 @@ export default function DashboardFracc() {
   const [qrValue, setQrValue] = useState("");
   const [openForm, setOpenForm] = useState(false);
   const [openAddCasa, setOpenAddCasa] = useState(false);
+  const [openEditResident, setOpenEditResident] = useState(false);
   const [selectedCasa, setSelectedCasa] = useState(null);
+  const [editingResident, setEditingResident] = useState(null);
   const [formData, setFormData] = useState({ nombre: "", relacion: "" });
+  const [editFormData, setEditFormData] = useState({ nombre: "", relacion: "" });
   const [newCasa, setNewCasa] = useState({ numero: "" });
-
-  const isMobile = useMediaQuery("(max-width:600px)");
 
   const user = useMemo(() => JSON.parse(localStorage.getItem("user")), []);
   const userId = user?._id;
 
   const navigate = useNavigate();
 
-  const fetchData = async () => {
+  const fetchData = async (showLoading = false) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       if (!user || !user.residencias) {
-        setLoading(false);
+        if (showLoading) setLoading(false);
         return;
       }
       const response = await axios.get(`${API_URL}/api/fraccionamientos/${user._id}`);
@@ -85,16 +83,21 @@ export default function DashboardFracc() {
       setFilteredData(dataFormatted);
     } catch (error) {
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
   }, []);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCasaChange = (e) => {
@@ -150,6 +153,32 @@ export default function DashboardFracc() {
       fetchData();
     } catch (error) {
       console.error("Error al eliminar residente:", error);
+    }
+  };
+
+  const handleEditResident = (house, residente) => {
+    setSelectedCasa(house);
+    setEditingResident(residente);
+    setEditFormData({
+      nombre: residente.nombre,
+      relacion: residente.relacion || ""
+    });
+    setOpenEditResident(true);
+  };
+
+  const handleUpdateResident = async () => {
+    if (!editFormData.nombre || !editFormData.relacion || !editingResident) return;
+    try {
+      await axios.put(
+        `${API_URL}/api/fraccionamientos/${user._id}/casas/${selectedCasa.numero}/residentes/${editingResident._id}`,
+        editFormData
+      );
+      setOpenEditResident(false);
+      setEditFormData({ nombre: "", relacion: "" });
+      setEditingResident(null);
+      fetchData();
+    } catch (error) {
+      console.error("Error al actualizar residente:", error);
     }
   };
 
@@ -358,6 +387,7 @@ export default function DashboardFracc() {
                       onToggleActive={toggleCasaActiva}
                       onShowQR={handleShowQR}
                       onDeleteResident={handleDeleteResident}
+                      onEditResident={handleEditResident}
                       sx={{
                         height: viewMode === "list" ? "auto" : "100%",
                       }}
@@ -369,271 +399,49 @@ export default function DashboardFracc() {
           </Box>
         </Fade>
 
-          <Dialog 
-            open={openQR} 
-            onClose={() => setOpenQR(false)} 
-            fullScreen={isMobile}
-            maxWidth="sm"
-            PaperProps={{
-              sx: {
-                borderRadius: isMobile ? 0 : 3,
-                overflow: 'hidden'
-              }
-            }}
-          >
-            <DialogTitle sx={{ 
-              fontSize: 20, 
-              fontWeight: 600,
-              background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2
-            }}>
-              <QrCodeIcon />
-              Código QR de Registro
-            </DialogTitle>
-            <DialogContent sx={{ textAlign: "center", py: 4 }}>
-              <Box sx={{ 
-                p: 3, 
-                bgcolor: "#ffffff", 
-                borderRadius: 3, 
-                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                border: '2px solid #f0f0f0',
-                mx: 'auto',
-                maxWidth: 280
-              }}>
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                    qrValue
-                  )}`}
-                  alt="QR Code"
-                  style={{ 
-                    display: "block", 
-                    margin: "0 auto",
-                    border: "4px solid #f8f9fa",
-                    borderRadius: "8px"
-                  }}
-                />
-              </Box>
-            </DialogContent>
-            <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
-              <Button 
-                onClick={() => setOpenQR(false)} 
-                variant="contained" 
-                size="medium"
-                sx={{ 
-                  borderRadius: 2,
-                  px: 4,
-                  py: 1,
-                  background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)'
-                }}
-              >
-                Cerrar
-              </Button>
-            </DialogActions>
-          </Dialog>
+        {/* Modals */}
+        <QRModal
+          open={openQR}
+          onClose={() => setOpenQR(false)}
+          qrValue={qrValue}
+        />
 
-          <Dialog 
-            open={openForm} 
-            onClose={() => setOpenForm(false)} 
-            fullScreen={isMobile}
-            maxWidth="sm" 
-            fullWidth
-            PaperProps={{
-              sx: {
-                borderRadius: isMobile ? 0 : 3,
-                minHeight: isMobile ? '100vh' : 'auto',
-              }
-            }}
-          >
-            <DialogTitle sx={{ 
-              fontSize: 20, 
-              fontWeight: 600,
-              pb: 1,
-              background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2
-            }}>
-              <PersonAddIcon />
-              Agregar Nuevo Residente
-              {selectedCasa && (
-                <Chip 
-                  label={`Casa ${selectedCasa.numero}`}
-                  size="small"
-                  sx={{ 
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    ml: 'auto'
-                  }}
-                />
-              )}
-            </DialogTitle>
-            <DialogContent sx={{ pt: 3 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <ResidentFormModal
+          open={openForm}
+          onClose={() => {
+            setOpenForm(false);
+            setFormData({ nombre: "", relacion: "" });
+          }}
+          onSubmit={handleAddResidente}
+          formData={formData}
+          onInputChange={handleInputChange}
+          selectedCasa={selectedCasa}
+        />
 
-                <TextField 
-                  label="Nombre completo" 
-                  name="nombre" 
-                  value={formData.nombre}
-                  onChange={handleInputChange} 
-                  fullWidth 
-                  variant="outlined"
-                  placeholder="Ingrese el nombre completo"
-                  InputProps={{
-                    sx: { borderRadius: 2 }
-                  }}
-                  required
-                />
-                <TextField 
-                  label="Relación con la propiedad" 
-                  name="relacion" 
-                  value={formData.relacion}
-                  onChange={handleInputChange} 
-                  fullWidth 
-                  variant="outlined"
-                  placeholder="Ej: Propietario, Familiar, Inquilino, Empleado..."
-                  InputProps={{
-                    sx: { borderRadius: 2 }
-                  }}
-                  helperText="Especifique la relación del residente con la propiedad"
-                />
-                <Box sx={{ 
-                  p: 2, 
-                  backgroundColor: '#f8f9fa', 
-                  borderRadius: 2,
-                  border: '1px solid #e9ecef'
-                }}>
-                  <Typography variant="body2" color="textSecondary">
-                    <strong>Información:</strong> El residente será agregado a la casa {selectedCasa?.numero} y podrá registrar visitas usando el código QR correspondiente.
-                  </Typography>
-                </Box>
-              </Box>
-            </DialogContent>
-            <DialogActions sx={{ p: 3, gap: 1 }}>
-              <Button 
-                onClick={() => {
-                  setOpenForm(false);
-                  setFormData({ nombre: "", relacion: "" });
-                }} 
-                variant="outlined"
-                size="medium"
-                sx={{ 
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleAddResidente} 
-                variant="contained"
-                size="medium"
-                disabled={!formData.nombre.trim()}
-                sx={{ 
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1,
-                  background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)',
-                  }
-                }}
-              >
-                Agregar Residente
-              </Button>
-            </DialogActions>
-          </Dialog>
+        <AddHouseModal
+          open={openAddCasa}
+          onClose={() => {
+            setOpenAddCasa(false);
+            setNewCasa({ numero: "" });
+          }}
+          onSubmit={handleAddCasa}
+          formData={newCasa}
+          onInputChange={handleCasaChange}
+        />
 
-          <Dialog 
-            open={openAddCasa} 
-            onClose={() => setOpenAddCasa(false)} 
-            fullScreen={isMobile}
-            maxWidth="sm" 
-            fullWidth
-            PaperProps={{
-              sx: {
-                borderRadius: isMobile ? 0 : 3,
-                minHeight: isMobile ? '100vh' : 'auto',
-              }
-            }}
-          >
-            <DialogTitle sx={{ 
-              fontSize: 20, 
-              fontWeight: 600,
-              pb: 1,
-              background: 'linear-gradient(135deg, #0ba969 0%, #0a8d5d 100%)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2
-            }}>
-              <AddIcon />
-              Agregar Nueva Casa
-            </DialogTitle>
-           
-            <DialogContent sx={{ pt: 3 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Box>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Complete la información de la nueva casa
-                  </Typography>
-                </Box>
-                <TextField 
-                  label="Número de Casa" 
-                  name="numero" 
-                  value={newCasa.numero}
-                  onChange={handleCasaChange} 
-                  fullWidth 
-                  variant="outlined"
-                  placeholder="Ej: 101, A-5, etc."
-                  InputProps={{
-                    sx: { borderRadius: 2 }
-                  }}
-                  required
-                />
-               
-              </Box>
-            </DialogContent>
-            <DialogActions sx={{ p: 3, gap: 1 }}>
-              <Button 
-                onClick={() => {
-                  setOpenAddCasa(false);
-                  setNewCasa({ numero: "" });
-                }} 
-                variant="outlined"
-                size="medium"
-                sx={{ 
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleAddCasa} 
-                variant="contained"
-                size="medium"
-                disabled={!newCasa.numero.trim()}
-                sx={{ 
-                  color: 'white', 
-                  borderRadius: 2,
-                  px: 3,
-                  py: 1,
-                  background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)',
-                  }
-                }}
-              >
-                Agregar Casa
-              </Button>
-            </DialogActions>
-          </Dialog>
+        <EditResidentModal
+          open={openEditResident}
+          onClose={() => {
+            setOpenEditResident(false);
+            setEditFormData({ nombre: "", relacion: "" });
+            setEditingResident(null);
+          }}
+          onSubmit={handleUpdateResident}
+          formData={editFormData}
+          onInputChange={handleEditInputChange}
+          selectedCasa={selectedCasa}
+          editingResident={editingResident}
+        />
 
       </Container>
     </Box>

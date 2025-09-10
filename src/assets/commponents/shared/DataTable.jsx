@@ -114,7 +114,7 @@ const DataTable = ({
                   {column.label}
                 </TableCell>
               ))}
-              {actions.length > 0 && <TableCell>Acciones</TableCell>}
+              {(actions.length > 0 || (typeof actions === 'function')) && <TableCell>Acciones</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -144,22 +144,26 @@ const DataTable = ({
                       {column.render ? column.render(row[column.id], row) : row[column.id]}
                     </TableCell>
                   ))}
-                  {actions.length > 0 && (
+                  {(actions.length > 0 || (typeof actions === 'function')) && (
                     <TableCell>
                       <Box sx={{ display: 'flex', gap: 1 }}>
-                        {actions.map((action, index) => (
-                          <IconButton
-                            key={index}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              action.onClick(row);
-                            }}
-                            color={action.color || "default"}
-                            size="small"
-                          >
-                            <action.icon />
-                          </IconButton>
-                        ))}
+                        {(typeof actions === 'function' ? actions(row) : actions).map((action, index) => {
+                          const IconComponent = action.icon;
+                          return (
+                            <IconButton
+                              key={index}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                action.onClick();
+                              }}
+                              color={action.color || "default"}
+                              size="small"
+                              title={action.tooltip}
+                            >
+                              <IconComponent />
+                            </IconButton>
+                          );
+                        })}
                       </Box>
                     </TableCell>
                   )}

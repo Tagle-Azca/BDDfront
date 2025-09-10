@@ -263,7 +263,7 @@ function ReportesAdmin() {
         <CardContent sx={{ p: 0 }}>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: 'primary.main' }}>
+              <TableRow sx={{ backgroundColor: 'rgb(2, 184, 74)' }}>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Casa</TableCell>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Visitante</TableCell>
                 <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Motivo</TableCell>

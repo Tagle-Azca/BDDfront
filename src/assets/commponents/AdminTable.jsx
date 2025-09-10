@@ -10,6 +10,8 @@ import {
 import axios from "axios";
 import EditIcon from "@mui/icons-material/Edit";
 import QrCodeIcon from "@mui/icons-material/QrCode";
+import ToggleOffIcon from "@mui/icons-material/ToggleOff";
+import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
 
@@ -20,6 +22,7 @@ import StatusChip from "./shared/StatusChip";
 import AgregarFraccionamientoModal from "./AgregarFracionamientoModal";
 import EditarFraccionamientoModal from "./ModificarFraccionamientoModal";
 import ContactoModal from "./ContactoModal";
+import ToggleFraccionamientoModal from "./modals/ToggleFraccionamientoModal";
 
 const API_URL = `${process.env.REACT_APP_API_URL_PROD}/api/fraccionamientos`;
 
@@ -37,6 +40,8 @@ const AdminTable = () => {
   const [selectedContacto, setSelectedContacto] = useState(null);
   const [openQrModal, setOpenQrModal] = useState(false);
   const [qrData, setQrData] = useState(null);
+  const [openToggleModal, setOpenToggleModal] = useState(false);
+  const [toggleLoading, setToggleLoading] = useState(false);
   
   const qrRef = useRef(null);
 
@@ -130,16 +135,22 @@ const AdminTable = () => {
     },
   ];
 
-  const actions = [
+  const getActionsForRow = (row) => [
     {
       icon: QrCodeIcon,
-      onClick: (row) => handleQrModal(row),
+      onClick: () => handleQrModal(row),
       color: "primary",
     },
     {
       icon: EditIcon,
-      onClick: (row) => handleOpenEditar(row),
+      onClick: () => handleOpenEditar(row),
       color: "default",
+    },
+    {
+      icon: row.estado === "activo" ? ToggleOffIcon : ToggleOnIcon,
+      onClick: () => handleToggleModal(row),
+      color: row.estado === "activo" ? "error" : "success",
+      tooltip: row.estado === "activo" ? "Desactivar" : "Activar",
     },
   ];
 
@@ -213,6 +224,34 @@ const AdminTable = () => {
 
   const handleCloseQrModal = () => setOpenQrModal(false);
 
+  const handleToggleModal = (row) => {
+    setSelectedRow(row);
+    setOpenToggleModal(true);
+  };
+
+  const handleCloseToggleModal = () => {
+    setOpenToggleModal(false);
+    setSelectedRow(null);
+    setToggleLoading(false);
+  };
+
+  const handleConfirmToggle = async () => {
+    if (!selectedRow) return;
+    
+    try {
+      setToggleLoading(true);
+      await axios.put(`${API_URL}/${selectedRow._id}/toggle`);
+      
+      await fetchData();
+      setOpenToggleModal(false);
+      setSelectedRow(null);
+    } catch (error) {
+      console.error("Error al cambiar estado del fraccionamiento:", error);
+    } finally {
+      setToggleLoading(false);
+    }
+  };
+
   const handleDownloadQR = () => {
     const svg = qrRef.current;
     const serializer = new XMLSerializer();
@@ -253,7 +292,7 @@ const AdminTable = () => {
         data={filteredData}
         loading={loading}
         error={error}
-        actions={actions}
+        actions={getActionsForRow}
         emptyMessage="No se encontraron fraccionamientos"
       />
 
@@ -290,6 +329,14 @@ const AdminTable = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ToggleFraccionamientoModal
+        open={openToggleModal}
+        onClose={handleCloseToggleModal}
+        onConfirm={handleConfirmToggle}
+        fraccionamiento={selectedRow}
+        loading={toggleLoading}
+      />
     </Container>
   );
 };

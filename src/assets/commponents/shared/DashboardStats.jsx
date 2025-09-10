@@ -32,7 +32,7 @@ const StatCard = ({
         '#0288d1'} 0%, ${color === 'primary' ? '#1565c0' : 
         color === 'success' ? '#1b5e20' : 
         color === 'error' ? '#c62828' : 
-        '#0277bd'} 100%)`,
+        '#2e7d32'} 100%)`,
       color: "white",
       position: "relative",
       overflow: "hidden",

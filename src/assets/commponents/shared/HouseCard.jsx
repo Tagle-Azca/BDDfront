@@ -26,6 +26,7 @@ import {
   ExpandLess as ExpandLessIcon,
   Group as GroupIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
 } from "@mui/icons-material";
 import StatusChip from "./StatusChip";
 
@@ -35,6 +36,7 @@ const HouseCard = ({
   onToggleActive,
   onShowQR,
   onDeleteResident,
+  onEditResident,
   sx = {},
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -123,7 +125,26 @@ const HouseCard = ({
                   secondary={residente.relacion || "Sin especificar"}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
-                <Box sx={{ ml: 1 }}>
+                <Box sx={{ ml: 1, display: 'flex', gap: 0.5 }}>
+                  <Tooltip title="Editar residente">
+                    <IconButton
+                      size="small"
+                      onClick={() => onEditResident && onEditResident(house, residente)}
+                      color="primary"
+                      sx={{ 
+                        width: 28, 
+                        height: 28,
+                        border: "1px solid",
+                        borderColor: "primary.main",
+                        "&:hover": { 
+                          bgcolor: "primary.main",
+                          color: "white"
+                        }
+                      }}
+                    >
+                      <EditIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip title="Eliminar residente">
                     <IconButton
                       size="small"
