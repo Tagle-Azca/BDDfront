@@ -130,50 +130,7 @@ function Invitados() {
     formData.append("FotoVisita", FotoVisita);
     formData.append("origen", "web");
 
-    try {
-      setLoading(true);
-      
-      const responseVisita = await fetch(`${API_URL}/api/fraccionamientos/${fraccId}/casas/${residencia}/visitas`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const dataVisita = await responseVisita.json();
-
-      if (!responseVisita.ok) {
-        setErrorGeneral(dataVisita.error || "Error al registrar visita");
-        setLoading(false);
-        return;
-      }
-
-
-      const resultadoNotificacion = await enviarNotificacion(
-        fraccId,
-        residencia,
-        nombre,
-        motivo,
-        dataVisita.foto
-      );
-
-      if (resultadoNotificacion.success) {
-        setExito(`${dataVisita.mensaje}. Notificación enviada a los residentes.`);
-        
-        setNombre("");
-        setMotivo("");
-        setResidencia("");
-        setFotoVisita(null);
-        setErrorGeneral("");
-        setFotoError(false);
-      } else {
-        setExito(dataVisita.mensaje);
-        setErrorGeneral(`Advertencia: ${resultadoNotificacion.error || "No se pudo notificar a los residentes"}`);
-      }
-
-    } catch (err) {
-      setErrorGeneral("Error de conexión. Intenta nuevamente.");
-    } finally {
-      setLoading(false);
-    }
+    
   };
 
   return (
