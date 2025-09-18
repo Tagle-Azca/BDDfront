@@ -45,7 +45,7 @@ function Invitados() {
             .filter((c) => c.activa === true)
             .map((c) => c.numero);
           setResidencias(lista);
-          
+
           if (casaParam && lista.includes(parseInt(casaParam))) {
             setResidencia(casaParam);
           }
@@ -72,40 +72,10 @@ function Invitados() {
     }
   };
 
-  const enviarNotificacion = async (fraccId, residencia, nombre, motivo, fotoUrl) => {
-    try {
-      
-      const response = await fetch(`${API_URL}/api/notifications/send-notification`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: nombre,
-          body: motivo,
-          fraccId: fraccId,
-          residencia: residencia,
-          foto: fotoUrl
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        return { success: true, notificationId: data.notificationId };
-      } else {
-        return { success: false, error: data.error };
-      }
-      
-    } catch (error) {
-      return { success: false, error: "Error de conexión al enviar notificación" };
-    }
-  };
-
   const handleSubmit = async () => {
     setErrorGeneral("");
     setExito("");
-    
+
     if (!nombre || !motivo || !residencia) {
       setErrorGeneral("Por favor, completa todos los campos.");
       return;
@@ -130,7 +100,41 @@ function Invitados() {
     formData.append("FotoVisita", FotoVisita);
     formData.append("origen", "web");
 
-    
+    try {
+      setLoading(true);
+
+      const responseVisita = await fetch(
+        `${API_URL}/api/fraccionamientos/${fraccId}/casas/${residencia}/visitas`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const dataVisita = await responseVisita.json();
+
+      if (!responseVisita.ok) {
+        setErrorGeneral(dataVisita.error || "Error al registrar visita");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ El backend ya manda la notificación
+      setExito(`${dataVisita.mensaje}. Notificación enviada a los residentes.`);
+
+      // Resetear formulario
+      setNombre("");
+      setMotivo("");
+      setResidencia("");
+      setFotoVisita(null);
+      setErrorGeneral("");
+      setFotoError(false);
+
+    } catch (err) {
+      setErrorGeneral("Error de conexión. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -147,7 +151,12 @@ function Invitados() {
     >
       <Card sx={{ width: "100%", borderRadius: 5, boxShadow: 6 }}>
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <Typography variant="h5" fontWeight="bold" textAlign="center" color="black">
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            textAlign="center"
+            color="black"
+          >
             Registro de Visitas
           </Typography>
 
@@ -241,6 +250,7 @@ function Invitados() {
 
           <Box textAlign="center">
             <Button
+              type="button" 
               variant="contained"
               disabled={loading || fotoError}
               sx={{
@@ -262,7 +272,11 @@ function Invitados() {
           </Box>
 
           {loading && (
-            <Typography variant="body2" textAlign="center" color="text.secondary">
+            <Typography
+              variant="body2"
+              textAlign="center"
+              color="text.secondary"
+            >
               Registrando visita y enviando notificación...
             </Typography>
           )}
