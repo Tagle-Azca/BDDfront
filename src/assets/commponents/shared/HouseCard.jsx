@@ -122,7 +122,7 @@ const HouseCard = ({
                       {residente.nombre}
                     </Typography>
                   }
-                  secondary={residente.relacion || "Sin especificar"}
+                  secondary=""
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
                 <Box sx={{ ml: 1, display: 'flex', gap: 0.5 }}>

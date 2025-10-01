@@ -26,7 +26,7 @@ const EditResidentModal = ({
   const isMobile = useMediaQuery("(max-width:600px)");
 
   const handleSubmit = () => {
-    if (!formData.nombre.trim() || !formData.relacion.trim()) return;
+    if (!formData.nombre.trim()) return;
     onSubmit();
   };
 
@@ -94,32 +94,6 @@ const EditResidentModal = ({
             }}
             required
           />
-          <TextField 
-            label="Relación con la propiedad" 
-            name="relacion" 
-            value={formData.relacion}
-            onChange={onInputChange} 
-            fullWidth 
-            variant="outlined"
-            placeholder="Ej: Propietario, Familiar, Inquilino, Empleado..."
-            InputProps={{
-              sx: { 
-                borderRadius: 2,
-                backgroundColor: '#fafafa'
-              }
-            }}
-            InputLabelProps={{
-              sx: { color: '#666' }
-            }}
-            helperText="Especifique la relación del residente con la propiedad"
-            FormHelperTextProps={{
-              sx: { 
-                fontSize: '0.75rem',
-                color: '#888',
-                mt: 0.5
-              }
-            }}
-          />
         </Box>
       </DialogContent>
       
@@ -155,7 +129,7 @@ const EditResidentModal = ({
           onClick={handleSubmit} 
           variant="contained"
           size="large"
-          disabled={!formData.nombre.trim() || !formData.relacion.trim() || loading}
+          disabled={!formData.nombre.trim() || loading}
           sx={{ 
             borderRadius: 3,
             px: 4,

@@ -87,19 +87,6 @@ const ResidentFormModal = ({
             }}
             required
           />
-          <TextField 
-            label="Relación con la propiedad" 
-            name="relacion" 
-            value={formData.relacion}
-            onChange={onInputChange} 
-            fullWidth 
-            variant="outlined"
-            placeholder="Ej: Propietario, Familiar, Inquilino, Empleado..."
-            InputProps={{
-              sx: { borderRadius: 2 }
-            }}
-            helperText="Especifique la relación del residente con la propiedad"
-          />
           <Box sx={{ 
             p: 2, 
             backgroundColor: '#f8f9fa', 

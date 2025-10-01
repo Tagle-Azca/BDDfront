@@ -48,8 +48,8 @@ export default function DashboardFracc() {
   const [openEditResident, setOpenEditResident] = useState(false);
   const [selectedCasa, setSelectedCasa] = useState(null);
   const [editingResident, setEditingResident] = useState(null);
-  const [formData, setFormData] = useState({ nombre: "", relacion: "" });
-  const [editFormData, setEditFormData] = useState({ nombre: "", relacion: "" });
+  const [formData, setFormData] = useState({ nombre: "" });
+  const [editFormData, setEditFormData] = useState({ nombre: "" });
   const [newCasa, setNewCasa] = useState({ numero: "" });
 
   const user = useMemo(() => JSON.parse(localStorage.getItem("user")), []);
@@ -74,7 +74,6 @@ export default function DashboardFracc() {
         residentes: casa.residentes.map((res) => ({
           _id: res._id,
           nombre: res.nombre,
-          relacion: res.relacion,
           activo: res.activo,
         })),
       }));
@@ -111,14 +110,14 @@ export default function DashboardFracc() {
   };
 
   const handleAddResidente = async () => {
-    if (!formData.nombre || !formData.relacion) return;
+    if (!formData.nombre) return;
     try {
       await axios.post(
         `${API_URL}/api/fraccionamientos/${user._id}/casas/${selectedCasa.numero}/residentes`,
         formData
       );
       setOpenForm(false);
-      setFormData({ nombre: "", relacion: "" });
+      setFormData({ nombre: "" });
       fetchData();
     } catch (error) {
     }
@@ -160,21 +159,20 @@ export default function DashboardFracc() {
     setSelectedCasa(house);
     setEditingResident(residente);
     setEditFormData({
-      nombre: residente.nombre,
-      relacion: residente.relacion || ""
+      nombre: residente.nombre
     });
     setOpenEditResident(true);
   };
 
   const handleUpdateResident = async () => {
-    if (!editFormData.nombre || !editFormData.relacion || !editingResident) return;
+    if (!editFormData.nombre || !editingResident) return;
     try {
       await axios.put(
         `${API_URL}/api/fraccionamientos/${user._id}/casas/${selectedCasa.numero}/residentes/${editingResident._id}`,
         editFormData
       );
       setOpenEditResident(false);
-      setEditFormData({ nombre: "", relacion: "" });
+      setEditFormData({ nombre: "" });
       setEditingResident(null);
       fetchData();
     } catch (error) {
@@ -410,7 +408,7 @@ export default function DashboardFracc() {
           open={openForm}
           onClose={() => {
             setOpenForm(false);
-            setFormData({ nombre: "", relacion: "" });
+            setFormData({ nombre: "" });
           }}
           onSubmit={handleAddResidente}
           formData={formData}
@@ -433,7 +431,7 @@ export default function DashboardFracc() {
           open={openEditResident}
           onClose={() => {
             setOpenEditResident(false);
-            setEditFormData({ nombre: "", relacion: "" });
+            setEditFormData({ nombre: "" });
             setEditingResident(null);
           }}
           onSubmit={handleUpdateResident}

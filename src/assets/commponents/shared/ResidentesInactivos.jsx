@@ -135,11 +135,6 @@ export default function ResidentesInactivos({ open, onClose, fraccionamientoId, 
                         <Typography variant="subtitle1">
                           {residente.nombre}
                         </Typography>
-                        <Chip 
-                          label={residente.relacion} 
-                          size="small" 
-                          variant="outlined" 
-                        />
                       </Box>
                     }
                     secondary={
