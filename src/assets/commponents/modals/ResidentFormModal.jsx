@@ -74,12 +74,14 @@ const ResidentFormModal = ({
       
       <DialogContent sx={{ pt: 3 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <TextField 
-            label="Nombre completo" 
-            name="nombre" 
+          <TextField
+            label="Nombre completo"
+            name="nombre"
             value={formData.nombre}
-            onChange={onInputChange} 
-            fullWidth 
+            onChange={onInputChange}
+            inputProps={{ maxLength: 50 }}
+            helperText={`${formData.nombre.length}/50 caracteres`}
+            fullWidth
             variant="outlined"
             placeholder="Ingrese el nombre completo"
             InputProps={{
@@ -99,6 +101,7 @@ const ResidentFormModal = ({
           </Box>
         </Box>
       </DialogContent>
+
       
       <DialogActions sx={{ p: 3, gap: 1 }}>
         <Button 

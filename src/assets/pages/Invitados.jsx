@@ -13,6 +13,7 @@ import {
   CardContent,
 } from "@mui/material";
 import { useState, useEffect } from "react";
+import handleFotoChange from "../commponents/HandleFotoChange";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
 
@@ -57,20 +58,7 @@ function Invitados() {
       });
   }, []);
 
-  const handleFotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-      if (!validTypes.includes(file.type)) {
-        setFotoError(true);
-        setErrorGeneral("Solo se permiten imágenes JPG o PNG");
-        return;
-      }
-      setFotoVisita(file);
-      setFotoError(false);
-      setErrorGeneral("");
-    }
-  };
+  
 
   const handleSubmit = async () => {
     setErrorGeneral("");
@@ -119,10 +107,8 @@ function Invitados() {
         return;
       }
 
-      // ✅ El backend ya manda la notificación
-      setExito(`${dataVisita.mensaje}. Notificación enviada a los residentes.`);
+      setExito(`${dataVisita.mensaje}. Notificación enviada.`);
 
-      // Resetear formulario
       setNombre("");
       setMotivo("");
       setResidencia("");
@@ -167,6 +153,8 @@ function Invitados() {
             label="Nombre del visitante"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            inputProps={{ maxLength: 20 }}
+            helperText={`${nombre.length}/20 caracteres`}
             fullWidth
             disabled={loading}
             sx={{
@@ -179,6 +167,8 @@ function Invitados() {
             label="Motivo de la visita"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
+            inputProps={{ maxLength: 30 }}
+            helperText={`${motivo.length}/30 caracteres`}
             fullWidth
             disabled={loading}
             sx={{
