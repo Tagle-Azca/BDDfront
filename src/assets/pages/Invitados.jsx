@@ -47,7 +47,7 @@ function Invitados() {
             .map((c) => c.numero);
           setResidencias(lista);
 
-          if (casaParam && lista.includes(parseInt(casaParam))) {
+          if (casaParam && lista.includes(casaParam)) {
             setResidencia(casaParam);
           }
         }
