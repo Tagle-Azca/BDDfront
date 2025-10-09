@@ -13,7 +13,6 @@ import {
   CardContent,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import handleFotoChange from "../commponents/HandleFotoChange";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
 
@@ -27,6 +26,21 @@ function Invitados() {
   const [fotoError, setFotoError] = useState(false);
   const [residencias, setResidencias] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+      if (!validTypes.includes(file.type)) {
+        setFotoError(true);
+        setErrorGeneral("Solo se permiten imágenes JPG o PNG");
+        return;
+      }
+      setFotoVisita(file);
+      setFotoError(false);
+      setErrorGeneral("");
+    }
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
