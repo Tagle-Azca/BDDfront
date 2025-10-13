@@ -167,7 +167,7 @@ function Invitados() {
             label="Nombre del visitante"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            inputProps={{ maxLength: 30 }}
+            inputProps={{ minLength: 3, maxLength: 30 }}
             helperText={`${nombre.length}/30 caracteres`}
             fullWidth
             disabled={loading}
@@ -181,7 +181,7 @@ function Invitados() {
             label="Motivo de la visita"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            inputProps={{ maxLength: 40 }}
+            inputProps={{ minLength: 3, maxLength: 40 }}
             helperText={`${motivo.length}/40 caracteres`}
             fullWidth
             disabled={loading}
