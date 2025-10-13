@@ -74,12 +74,26 @@ function Invitados() {
 
   
 
+  const isNombreValid = nombre.length >= 3 && nombre.length <= 30;
+  const isMotivoValid = motivo.length >= 3 && motivo.length <= 40;
+  const isFormValid = isNombreValid && isMotivoValid && residencia && FotoVisita;
+
   const handleSubmit = async () => {
     setErrorGeneral("");
     setExito("");
 
     if (!nombre || !motivo || !residencia) {
       setErrorGeneral("Por favor, completa todos los campos.");
+      return;
+    }
+
+    if (!isNombreValid) {
+      setErrorGeneral("El nombre debe tener entre 3 y 30 caracteres.");
+      return;
+    }
+
+    if (!isMotivoValid) {
+      setErrorGeneral("El motivo debe tener entre 3 y 40 caracteres.");
       return;
     }
 
@@ -171,6 +185,7 @@ function Invitados() {
             helperText={`${nombre.length}/30 caracteres`}
             fullWidth
             disabled={loading}
+            error={nombre.length > 0 && !isNombreValid}
             sx={{
               borderRadius: 3,
               "& .MuiInputBase-input": { color: "black" },
@@ -185,6 +200,7 @@ function Invitados() {
             helperText={`${motivo.length}/40 caracteres`}
             fullWidth
             disabled={loading}
+            error={motivo.length > 0 && !isMotivoValid}
             sx={{
               borderRadius: 3,
               "& .MuiInputBase-input": { color: "black" },
@@ -254,13 +270,13 @@ function Invitados() {
 
           <Box textAlign="center">
             <Button
-              type="button" 
+              type="button"
               variant="contained"
-              disabled={loading || fotoError}
+              disabled={loading || !isFormValid}
               sx={{
-                backgroundColor: fotoError ? "error.main" : "success.main",
+                backgroundColor: !isFormValid ? "error.main" : "success.main",
                 "&:hover": {
-                  backgroundColor: fotoError ? "error.dark" : "success.dark",
+                  backgroundColor: !isFormValid ? "error.dark" : "success.dark",
                 },
                 borderRadius: "30px",
                 height: "3.5rem",
