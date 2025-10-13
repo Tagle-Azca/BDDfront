@@ -66,8 +66,7 @@ function Invitados() {
           }
         }
       })
-      .catch((err) => {
-        console.error("Error al cargar residencias:", err);
+      .catch(() => {
         setErrorGeneral("Error al cargar fraccionamiento");
       });
   }, []);
@@ -126,8 +125,6 @@ function Invitados() {
         }
       );
 
-      const dataVisita = await responseVisita.json();
-
       if (!responseVisita.ok) {
         setErrorGeneral("Error al procesar la solicitud");
         setLoading(false);
@@ -143,7 +140,7 @@ function Invitados() {
       setErrorGeneral("");
       setFotoError(false);
 
-    } catch (err) {
+    } catch {
       setErrorGeneral("Error de conexión. Intenta nuevamente.");
     } finally {
       setLoading(false);
