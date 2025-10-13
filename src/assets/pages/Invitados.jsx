@@ -76,7 +76,6 @@ function Invitados() {
 
   const isNombreValid = nombre.length >= 3 && nombre.length <= 30;
   const isMotivoValid = motivo.length >= 3 && motivo.length <= 40;
-  const isFormValid = isNombreValid && isMotivoValid && residencia && FotoVisita;
 
   const handleSubmit = async () => {
     setErrorGeneral("");
@@ -130,12 +129,12 @@ function Invitados() {
       const dataVisita = await responseVisita.json();
 
       if (!responseVisita.ok) {
-        setErrorGeneral(dataVisita.error || "Error al registrar visita");
+        setErrorGeneral("Error al procesar la solicitud");
         setLoading(false);
         return;
       }
 
-      setExito(`${dataVisita.mensaje}. Notificación enviada.`);
+      setExito("Visita solicitada con éxito");
 
       setNombre("");
       setMotivo("");
@@ -185,7 +184,6 @@ function Invitados() {
             helperText={`${nombre.length}/30 caracteres`}
             fullWidth
             disabled={loading}
-            error={nombre.length > 0 && !isNombreValid}
             sx={{
               borderRadius: 3,
               "& .MuiInputBase-input": { color: "black" },
@@ -200,7 +198,6 @@ function Invitados() {
             helperText={`${motivo.length}/40 caracteres`}
             fullWidth
             disabled={loading}
-            error={motivo.length > 0 && !isMotivoValid}
             sx={{
               borderRadius: 3,
               "& .MuiInputBase-input": { color: "black" },
@@ -272,11 +269,11 @@ function Invitados() {
             <Button
               type="button"
               variant="contained"
-              disabled={loading || !isFormValid}
+              disabled={loading}
               sx={{
-                backgroundColor: !isFormValid ? "error.main" : "success.main",
+                backgroundColor: "success.main",
                 "&:hover": {
-                  backgroundColor: !isFormValid ? "error.dark" : "success.dark",
+                  backgroundColor: "success.dark",
                 },
                 borderRadius: "30px",
                 height: "3.5rem",
