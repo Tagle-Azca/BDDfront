@@ -17,13 +17,20 @@ import {
   CardContent,
   Grid,
   Pagination,
-  Stack
+  Stack,
+  Switch,
+  FormControlLabel,
+  Tooltip,
+  IconButton
 } from "@mui/material";
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams, useNavigate } from "react-router-dom";
 import ReportOffIcon from '@mui/icons-material/ReportOff';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import StorageIcon from '@mui/icons-material/Storage';
+import CloudIcon from '@mui/icons-material/Cloud';
+import InfoIcon from '@mui/icons-material/Info';
 import Navbar from "../commponents/Navbar";
 
 const API_URL = process.env.REACT_APP_API_URL_PROD;
@@ -41,29 +48,31 @@ function ReportesAdmin() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalReportes, setTotalReportes] = useState(0);
   const [reportesPorPagina] = useState(20);
+  const [usarCassandra, setUsarCassandra] = useState(false);
+  const [dataSource, setDataSource] = useState('mongodb');
 
-  const calcularFechas = () => {
-    const hoy = dayjs();
+  const calcularDias = () => {
     const meses = parseInt(rango);
-    const desde = hoy.subtract(meses, 'month').format("YYYY-MM-DD");
-    const hasta = hoy.format("YYYY-MM-DD");
-    return { desde, hasta };
+    return meses * 30;
   };
 
-  const obtenerReportes = async (filtrarPorCasa = false, pagina = 1) => {
+  const obtenerReportesMongoDB = async (filtrarPorCasa = false, pagina = 1) => {
     try {
       setLoading(true);
       setError("");
 
-      const { desde, hasta } = calcularFechas();
-      
+      const hoy = dayjs();
+      const meses = parseInt(rango);
+      const desde = hoy.subtract(meses, 'month').format("YYYY-MM-DD");
+      const hasta = hoy.format("YYYY-MM-DD");
+
       let url;
-      let params = { 
-        desde, 
-        hasta, 
+      let params = {
+        desde,
+        hasta,
         limite: reportesPorPagina,
         pagina: pagina,
-        ordenar: 'desc' 
+        ordenar: 'desc'
       };
 
       if (filtrarPorCasa && casa && casa.trim() !== "") {
@@ -76,17 +85,18 @@ function ReportesAdmin() {
 
       if (response.data.success) {
         let reportesData = response.data.reportes || [];
-        
+
         reportesData = reportesData.sort((a, b) => {
           return new Date(b.tiempo) - new Date(a.tiempo);
         });
-        
+
         setReportes(reportesData);
         setEstadisticas(response.data.estadisticas || null);
         setCurrentPage(pagina);
         setTotalReportes(response.data.total || reportesData.length);
         setTotalPages(Math.ceil((response.data.total || reportesData.length) / reportesPorPagina));
-        
+        setDataSource('mongodb');
+
       } else {
         setError("Error al obtener reportes");
         setReportes([]);
@@ -99,6 +109,75 @@ function ReportesAdmin() {
       setReportes([]);
       setTotalReportes(0);
       setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const obtenerReportesCassandra = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const days = calcularDias();
+      const params = {
+        days: days,
+        limit: 200
+      };
+
+      if (casa && casa.trim() !== "") {
+        params.numeroCasa = casa.trim();
+      }
+
+      const url = `${API_URL}/api/reportes/historial-cassandra/${fraccId}`;
+      const response = await axios.get(url, { params });
+
+      if (response.data.success) {
+        let reportesData = response.data.reportes || [];
+
+        // Convertir formato de Cassandra a formato de MongoDB
+        reportesData = reportesData.map(r => ({
+          _id: r.reporteId,
+          numeroCasa: r.numeroCasa,
+          nombre: r.nombre,
+          motivo: r.motivo,
+          foto: r.foto,
+          tiempo: r.timestamp,
+          estatus: r.estatus,
+          autorizadoPor: r.autorizadoPor
+        }));
+
+        // Ordenar por fecha descendente
+        reportesData = reportesData.sort((a, b) => {
+          return new Date(b.tiempo) - new Date(a.tiempo);
+        });
+
+        setReportes(reportesData);
+        setEstadisticas(response.data.estadisticas || null);
+        setTotalReportes(reportesData.length);
+        setTotalPages(1); // Cassandra trae todos los datos
+        setCurrentPage(1);
+        setDataSource('cassandra');
+
+      } else {
+        setError("Error al obtener reportes de Cassandra");
+        setReportes([]);
+        setTotalReportes(0);
+        setTotalPages(1);
+      }
+
+    } catch (err) {
+      console.error('Error al obtener reportes de Cassandra:', err);
+      if (err.response?.status === 503) {
+        setError("Cassandra no está disponible. Cambiando a MongoDB...");
+        setUsarCassandra(false);
+        obtenerReportesMongoDB(casa && casa.trim() !== "", 1);
+      } else {
+        setError(err.response?.data?.message || "Error de conexión al obtener reportes de Cassandra");
+        setReportes([]);
+        setTotalReportes(0);
+        setTotalPages(1);
+      }
     } finally {
       setLoading(false);
     }
@@ -132,30 +211,61 @@ function ReportesAdmin() {
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
-    obtenerReportes(casa && casa.trim() !== "", newPage);
+    if (!usarCassandra) {
+      obtenerReportesMongoDB(casa && casa.trim() !== "", newPage);
+    }
   };
 
   const handleBuscar = () => {
     setCurrentPage(1);
-    obtenerReportes(true, 1);
+    if (usarCassandra) {
+      obtenerReportesCassandra();
+    } else {
+      obtenerReportesMongoDB(true, 1);
+    }
   };
 
   const handleVerTodos = () => {
     setCasa("");
     setCurrentPage(1);
-    obtenerReportes(false, 1);
+    if (usarCassandra) {
+      obtenerReportesCassandra();
+    } else {
+      obtenerReportesMongoDB(false, 1);
+    }
+  };
+
+  const handleToggleDataSource = (event) => {
+    const newValue = event.target.checked;
+    setUsarCassandra(newValue);
+    setCurrentPage(1);
+
+    // Obtener datos de la nueva fuente
+    if (newValue) {
+      obtenerReportesCassandra();
+    } else {
+      obtenerReportesMongoDB(casa && casa.trim() !== "", 1);
+    }
   };
 
   useEffect(() => {
     if (fraccId && currentPage > 0) {
       const tieneFiltroCasa = casa && casa.trim() !== "";
-      obtenerReportes(tieneFiltroCasa, currentPage);
+      if (usarCassandra) {
+        obtenerReportesCassandra();
+      } else {
+        obtenerReportesMongoDB(tieneFiltroCasa, currentPage);
+      }
     }
   }, [rango]);
 
   useEffect(() => {
     if (fraccId) {
-      obtenerReportes(false, 1);
+      if (usarCassandra) {
+        obtenerReportesCassandra();
+      } else {
+        obtenerReportesMongoDB(false, 1);
+      }
     }
   }, [fraccId]);
 
@@ -163,9 +273,37 @@ function ReportesAdmin() {
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       <Navbar />
       <Container sx={{ py: 3, maxWidth: 'xl' }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-        Reportes del Fraccionamiento
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 0 }}>
+          Reportes del Fraccionamiento
+        </Typography>
+
+        {/* Selector de fuente de datos */}
+        <Box display="flex" alignItems="center" gap={2}>
+          <Chip
+            icon={dataSource === 'cassandra' ? <StorageIcon /> : <CloudIcon />}
+            label={dataSource === 'cassandra' ? 'Historial Completo (Cassandra)' : 'Datos Recientes (MongoDB)'}
+            color={dataSource === 'cassandra' ? 'secondary' : 'primary'}
+            variant="outlined"
+          />
+          <Tooltip title={
+            usarCassandra
+              ? "Cassandra: Historial completo de todos los reportes históricos"
+              : "MongoDB: Datos recientes con paginación"
+          }>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={usarCassandra}
+                  onChange={handleToggleDataSource}
+                  color="secondary"
+                />
+              }
+              label={usarCassandra ? "Historial Completo" : "Datos Recientes"}
+            />
+          </Tooltip>
+        </Box>
+      </Box>
 
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -184,21 +322,23 @@ function ReportesAdmin() {
                 label="Período"
                 onChange={(e) => setRango(e.target.value)}
               >
-                <MenuItem value="1">Último mes</MenuItem>
-                <MenuItem value="2">Últimos 2 meses</MenuItem>
-                <MenuItem value="3">Últimos 3 meses</MenuItem>
+                <MenuItem value="1">Último mes (30 días)</MenuItem>
+                <MenuItem value="2">Últimos 2 meses (60 días)</MenuItem>
+                <MenuItem value="3">Últimos 3 meses (90 días)</MenuItem>
+                <MenuItem value="6">Últimos 6 meses (180 días)</MenuItem>
+                <MenuItem value="12">Último año (365 días)</MenuItem>
               </Select>
             </FormControl>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={handleBuscar}
               disabled={loading}
               sx={{ minWidth: 120 }}
             >
               {loading ? "Buscando..." : "Buscar"}
             </Button>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={handleVerTodos}
               disabled={loading}
               sx={{ minWidth: 120 }}
@@ -221,7 +361,7 @@ function ReportesAdmin() {
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <BarChartIcon /> Estadísticas
+              <BarChartIcon /> Estadísticas del Período
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={6} sm={3}>
@@ -276,9 +416,9 @@ function ReportesAdmin() {
             <TableBody>
               {Array.isArray(reportes) && reportes.length > 0 ? (
                 reportes.map((reporte, index) => (
-                  <TableRow 
+                  <TableRow
                     key={reporte._id || index}
-                    sx={{ 
+                    sx={{
                       '&:hover': { backgroundColor: 'action.hover' },
                       '&:nth-of-type(even)': { backgroundColor: 'action.selected' }
                     }}
@@ -288,10 +428,10 @@ function ReportesAdmin() {
                     </TableCell>
                     <TableCell>{reporte.nombre}</TableCell>
                     <TableCell sx={{ maxWidth: 200 }}>
-                      <Typography variant="body2" sx={{ 
-                        overflow: 'hidden', 
-                        textOverflow: 'ellipsis', 
-                        whiteSpace: 'nowrap' 
+                      <Typography variant="body2" sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                       }}>
                         {reporte.motivo}
                       </Typography>
@@ -325,8 +465,8 @@ function ReportesAdmin() {
                             alt="Foto del visitante"
                             width="50"
                             height="50"
-                            style={{ 
-                              borderRadius: 8, 
+                            style={{
+                              borderRadius: 8,
                               objectFit: 'cover',
                               cursor: 'pointer',
                               border: '2px solid #ddd'
@@ -350,7 +490,7 @@ function ReportesAdmin() {
                         No hay reportes disponibles
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
-                        {casa ? `No se encontraron reportes para la casa ${casa} en el período seleccionado` : 
+                        {casa ? `No se encontraron reportes para la casa ${casa} en el período seleccionado` :
                                'No se encontraron reportes en el período seleccionado'}
                       </Typography>
                     </Box>
@@ -362,26 +502,44 @@ function ReportesAdmin() {
         </CardContent>
       </Card>
 
-      {reportes.length > 0 && (
+      {reportes.length > 0 && !usarCassandra && (
         <Card sx={{ mt: 3 }}>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <Typography variant="body2" color="text.secondary">
                 Mostrando {reportes.length} de {totalReportes} reportes (Página {currentPage} de {totalPages})
               </Typography>
-              
+
               <Stack spacing={2}>
-                <Pagination 
-                  count={totalPages} 
-                  page={currentPage} 
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
                   onChange={handlePageChange}
                   color="primary"
                   size="medium"
-                  showFirstButton 
+                  showFirstButton
                   showLastButton
                   disabled={loading}
                 />
               </Stack>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {reportes.length > 0 && usarCassandra && (
+        <Card sx={{ mt: 3 }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Mostrando {reportes.length} reportes históricos de Cassandra
+              </Typography>
+              <Chip
+                icon={<StorageIcon />}
+                label="Historial Completo"
+                color="secondary"
+                variant="outlined"
+              />
             </Box>
           </CardContent>
         </Card>
